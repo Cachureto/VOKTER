@@ -192,7 +192,7 @@ Turborepo starts both in parallel:
 
 At this point you can register an account on the web and browse the catalog.
 
-### 7. Create an admin account
+### 6. Create an admin account
 
 Every account created from the website is a customer. Register on the web, then promote it:
 
