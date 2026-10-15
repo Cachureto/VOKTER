@@ -170,7 +170,7 @@ export default async function HomePage() {
         <Marquee speed="42s" className="select-none">
           {TICKER.map((palabra, i) => (
             <span key={i} className="flex items-center gap-8 px-8">
-              <span className="font-display text-2xl font-semibold tracking-[-0.02em] text-white/85 sm:text-3xl">
+              <span className="font-display text-2xl font-semibold tracking-[-0.02em] text-foreground/85 sm:text-3xl">
                 {palabra}
               </span>
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />

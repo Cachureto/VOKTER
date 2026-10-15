@@ -10,7 +10,9 @@ import Link from 'next/link';
  *
  * El emblema es apaisado (casi 2:1), así que se fija el alto y el ancho va
  * solo. Está pensado para fondo oscuro: el resplandor azul se compuso sobre
- * negro y sobre un fondo claro se vería apagado.
+ * negro. En modo claro no se retoca el logo, se le pone detrás una placa
+ * oscura (`.mark-plate` en globals.css), que conserva la marca intacta y de
+ * paso la hace leer como un sello.
  */
 export function VokterMark({ className = 'h-8 w-auto' }) {
   return (
@@ -34,7 +36,9 @@ export default function Logo({ className = '' }) {
       className={`group inline-flex items-center gap-2.5 ${className}`}
       aria-label="Vokter, ir al inicio"
     >
-      <VokterMark className="h-8 w-auto transition-transform duration-500 group-hover:scale-110" />
+      <span className="mark-plate">
+        <VokterMark className="h-8 w-auto transition-transform duration-500 group-hover:scale-110" />
+      </span>
       <span className="font-display text-lg font-bold tracking-[-0.04em]">Vokter</span>
     </Link>
   );

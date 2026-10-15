@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import Logo from './Logo';
 import Marquee from './motion/Marquee';
+import ThemeToggle from './ThemeToggle';
 
 const LINKS = [
   { href: '/catalog', label: 'Catálogo' },
@@ -170,6 +171,7 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2 lg:justify-self-end">
+            <ThemeToggle />
             <Link href="/cart" className="icon-btn" aria-label={`Carrito, ${count} productos`}>
               <ShoppingBag size={20} />
               {count > 0 && (

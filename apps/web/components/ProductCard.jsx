@@ -11,7 +11,7 @@ export default function ProductCard({ product, priority = false }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group edge-light flex flex-col rounded-2xl border border-border bg-surface p-2 transition-all duration-300 hover:-translate-y-1.5 hover:border-white/25 hover:bg-surface-2 hover:shadow-[0_28px_56px_-28px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)]"
+      className="group edge-light flex flex-col rounded-2xl border border-border bg-surface p-2 transition-all duration-300 hover:-translate-y-1.5 hover:border-contrast/25 hover:bg-surface-2 hover:shadow-[var(--lift-shadow)]"
     >
       <div className="product-tile aspect-square w-full">
         {product.coverUrl ? (

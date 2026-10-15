@@ -8,7 +8,24 @@
    El verde queda reservado para autenticidad.
    ===================================================================== */
 
+/* ---------------------------------------------------------------------
+   Temas
+   El oscuro vive en :root y es la identidad de la marca. El claro redefine
+   los mismos tokens, así que ningún componente sabe en qué tema está: todos
+   leen variables.
+
+   Hay tres bloques a propósito y el orden importa:
+     1. :root                      → oscuro, y lo que se usa si no hay nada más
+     2. @media (prefers-color-scheme: light) sobre :root:not([data-theme="dark"])
+                                   → claro automático aunque el JavaScript no
+                                     llegue a ejecutarse
+     3. :root[data-theme="light"]  → la elección explícita del visitante, que
+                                     gana sobre la preferencia del sistema
+   --------------------------------------------------------------------- */
+
 :root {
+  color-scheme: dark;
+
   /* --- Negros --------------------------------------------------------
      El fondo baja un punto respecto a la versión anterior (#09090b) para
      que el blanco puro y el azul tengan más contra qué recortarse. */
@@ -20,16 +37,31 @@
   /* --- Blancos -------------------------------------------------------
      Antes el texto era hueso (#f5f5f0) y no había ni un borde blanco. Ahora
      hay una escala: blanco puro para lo que debe destacar, y versiones
-     apagadas para el resto. Los bordes son blanco con alfa ya resuelto a
-     hex, para que los modificadores de opacidad de Tailwind sigan
-     funcionando sobre ellos. */
+     apagadas para el resto. Los bordes son hex y no rgba para que los
+     modificadores de opacidad de Tailwind sigan funcionando sobre ellos. */
   --foreground: #ffffff;
   --muted: #a7a7b4;
   --subtle: #6e6e7c;
   --border: #22222b;
   --border-strong: #3d3d4b;
-  --border-bright: rgba(255, 255, 255, 0.28);
   --tile: #ffffff;
+
+  /* Color opuesto al fondo: blanco sobre oscuro, casi negro sobre claro.
+     Es lo que permite tener un botón "de máximo contraste" que funcione en
+     los dos temas sin cambiar de clase. */
+  --contrast: #ffffff;
+  --contrast-foreground: #050507;
+
+  /* Filos, rejillas y destellos. Separados del resto porque son los que
+     hay que invertir con más cuidado: una línea blanca sobre blanco
+     desaparece, y una negra sobre negro también. */
+  --hairline: rgba(255, 255, 255, 0.28);
+  --hairline-soft: rgba(255, 255, 255, 0.55);
+  --grid-line: rgba(255, 255, 255, 0.05);
+  --dot: rgba(255, 255, 255, 0.1);
+  --shimmer: rgba(255, 255, 255, 0.07);
+  --glow: rgba(0, 162, 232, 0.38);
+  --lift-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.9);
 
   /* --- Azul de marca -------------------------------------------------- */
   --accent: #00a2e8;
@@ -49,6 +81,87 @@
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
   --marquee-duration: 38s;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+
+    --background: #ffffff;
+    --surface: #f6f6f9;
+    --surface-2: #eeeef3;
+    --surface-hover: #e5e5ec;
+
+    --foreground: #0a0a0c;
+    --muted: #55555f;
+    --subtle: #8a8a96;
+    --border: #e3e3e9;
+    --border-strong: #c7c7d2;
+    /* Gris muy claro y no blanco: si el tile fuera blanco sobre fondo
+       blanco, las fotos de producto se quedarían flotando sin recorte. */
+    --tile: #f1f1f4;
+
+    --contrast: #0d0d10;
+    --contrast-foreground: #ffffff;
+
+    --hairline: rgba(0, 0, 0, 0.16);
+    --hairline-soft: rgba(0, 0, 0, 0.28);
+    --grid-line: rgba(0, 0, 0, 0.05);
+    --dot: rgba(0, 0, 0, 0.09);
+    --shimmer: rgba(0, 0, 0, 0.06);
+    /* El resplandor del hero está pensado para brillar sobre negro; sobre
+       blanco, al mismo valor, se ve como una mancha sucia. */
+    --glow: rgba(0, 162, 232, 0.16);
+    --lift-shadow: 0 24px 48px -30px rgba(10, 10, 14, 0.35);
+
+    /* Azul más profundo: #00a2e8 sobre blanco da 2,4:1 de contraste y no se
+       puede leer. Este llega a ~5:1 como texto y admite blanco encima
+       cuando hace de fondo, y sigue siendo reconocible como el azul Vokter. */
+    --accent: #0a76b0;
+    --accent-hover: #096293;
+    --accent-bright: #075a8a;
+    --accent-foreground: #ffffff;
+
+    --live: #15803d;
+    --danger: #c42626;
+    --warning: #9a5b00;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --surface: #f6f6f9;
+  --surface-2: #eeeef3;
+  --surface-hover: #e5e5ec;
+
+  --foreground: #0a0a0c;
+  --muted: #55555f;
+  --subtle: #8a8a96;
+  --border: #e3e3e9;
+  --border-strong: #c7c7d2;
+  --tile: #f1f1f4;
+
+  --contrast: #0d0d10;
+  --contrast-foreground: #ffffff;
+
+  --hairline: rgba(0, 0, 0, 0.16);
+  --hairline-soft: rgba(0, 0, 0, 0.28);
+  --grid-line: rgba(0, 0, 0, 0.05);
+  --dot: rgba(0, 0, 0, 0.09);
+  --shimmer: rgba(0, 0, 0, 0.06);
+  --glow: rgba(0, 162, 232, 0.16);
+  --lift-shadow: 0 24px 48px -30px rgba(10, 10, 14, 0.35);
+
+  --accent: #0a76b0;
+  --accent-hover: #096293;
+  --accent-bright: #075a8a;
+  --accent-foreground: #ffffff;
+
+  --live: #15803d;
+  --danger: #c42626;
+  --warning: #9a5b00;
 }
 
 /* =====================================================================
@@ -129,6 +242,8 @@
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-tile: var(--tile);
+  --color-contrast: var(--contrast);
+  --color-contrast-foreground: var(--contrast-foreground);
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Unbounded Variable", "Inter Variable", ui-sans-serif, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
@@ -140,7 +255,6 @@
 }
 
 html {
-  color-scheme: dark;
   scroll-behavior: smooth;
 }
 
@@ -204,7 +318,7 @@ input[type="number"] {
   /* Titular en blanco puro que se desvanece hacia el azul. El degradado se
      mueve despacio, así que el texto nunca está del todo quieto. */
   .text-gradient {
-    background: linear-gradient(100deg, #ffffff 10%, var(--accent-bright) 45%, #ffffff 80%);
+    background: linear-gradient(100deg, var(--foreground) 10%, var(--accent) 45%, var(--foreground) 80%);
     background-size: 220% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -236,21 +350,21 @@ input[type="number"] {
   }
 
   .btn-secondary {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border-strong bg-surface px-6 text-sm font-semibold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-white/50 hover:bg-surface-hover hover:shadow-[0_8px_28px_-10px_rgba(255,255,255,0.25)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border-strong bg-surface px-6 text-sm font-semibold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-contrast/50 hover:bg-surface-hover hover:shadow-[0_8px_28px_-12px_var(--hairline)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
 
   /* Botón blanco: la forma más directa de meter blanco en una página oscura
      sin tocar la estructura. Para la acción principal cuando el azul ya está
      ocupado en el mismo bloque. */
-  .btn-white {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_34px_-8px_rgba(255,255,255,0.45)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
+  .btn-contrast {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full bg-contrast px-6 text-sm font-semibold text-contrast-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_34px_-10px_var(--hairline-soft)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
 
   .btn-ghost {
     @apply inline-flex h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-medium text-muted transition-all duration-200 hover:bg-surface-hover hover:text-foreground active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
   .icon-btn {
-    @apply relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-all duration-200 hover:bg-surface-hover hover:text-white active:scale-90;
+    @apply relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-all duration-200 hover:bg-surface-hover hover:text-foreground active:scale-90;
   }
 
   /* ---------- Superficies ---------- */
@@ -258,7 +372,7 @@ input[type="number"] {
     @apply rounded-2xl border border-border bg-surface;
   }
   .card-interactive {
-    @apply rounded-2xl border border-border bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-surface-2 hover:shadow-[0_24px_48px_-28px_rgba(0,0,0,0.9)];
+    @apply rounded-2xl border border-border bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-contrast/25 hover:bg-surface-2 hover:shadow-[var(--lift-shadow)];
   }
   .product-tile {
     @apply relative overflow-hidden rounded-xl bg-tile;
@@ -277,7 +391,7 @@ input[type="number"] {
     left: 12%;
     right: 12%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    background: linear-gradient(90deg, transparent, var(--hairline-soft), transparent);
     opacity: 0.5;
     transition: opacity 0.35s var(--ease-out-soft);
     pointer-events: none;
@@ -307,6 +421,21 @@ input[type="number"] {
     animation: shine-sweep 0.85s var(--ease-out-soft);
   }
 
+  /* Placa del emblema.
+     El logo es un emblema con resplandor hecho para fondo oscuro: sobre
+     blanco pierde todo el brillo. En modo claro se le pone detrás una placa
+     oscura, que además lo hace leer como un sello. El relleno existe en los
+     dos temas para que al cambiar no se mueva nada de sitio. */
+  .mark-plate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.35rem;
+    border-radius: 0.7rem;
+    background: transparent;
+    transition: background-color 0.3s var(--ease-out-soft);
+  }
+
   /* ---------- Formularios ---------- */
   .input {
     @apply h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground transition-all duration-200 placeholder:text-subtle hover:border-border-strong focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none disabled:opacity-50;
@@ -331,8 +460,8 @@ input[type="number"] {
     text-shadow: 0 0 8px rgba(0, 162, 232, 0.6);
   }
   /* Blanco sobre negro, sin azul: para etiquetas neutras que deban pesar. */
-  .badge-white {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-white backdrop-blur;
+  .badge-contrast {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-contrast/25 bg-contrast/10 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-foreground backdrop-blur;
   }
   .badge-live {
     @apply inline-flex items-center gap-1.5 rounded-full border border-live/30 bg-live/10 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-live;
@@ -423,19 +552,19 @@ input[type="number"] {
   /* ---------- Fondos decorativos ---------- */
   .bg-grid {
     background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
     background-size: 56px 56px;
   }
   .bg-dots {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
     background-size: 22px 22px;
   }
   .mask-fade {
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
   }
   .glow-accent {
-    background: radial-gradient(closest-side, rgba(0, 162, 232, 0.38), transparent);
+    background: radial-gradient(closest-side, var(--glow), transparent);
     animation: neon-pulse 3.5s ease-in-out infinite;
   }
 
@@ -445,10 +574,22 @@ input[type="number"] {
     background-image: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.07) 50%,
+      var(--shimmer) 50%,
       transparent 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.8s linear infinite;
   }
+}
+
+/* Reglas que dependen del tema y no caben en un token suelto. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .mark-plate {
+    background: #0d0d10;
+    box-shadow: 0 2px 10px -5px rgba(10, 10, 14, 0.5);
+  }
+}
+:root[data-theme="light"] .mark-plate {
+  background: #0d0d10;
+  box-shadow: 0 2px 10px -5px rgba(10, 10, 14, 0.5);
 }
