@@ -7,14 +7,15 @@ catalog, and **drops with waitlists** for limited releases.
 
 ## Live
 
-| | |
+
+|Component| Path|
 |---|---|
 | Store | <https://nova-web-vokter.vercel.app> |
 | API | <https://nova-api-kappa.vercel.app/api/health> |
 | Android app | `/download` on the store, or the APK link from EAS |
 
 The browser only ever talks to the store's domain: Next.js proxies `/api/*` to the API behind the
-scenes. See [Deploying](#deploying) for why, and `DEPLOY.md` for the step-by-step.
+scenes. See [Deploying](#deploying) for why.
 
 ## What makes Vokter different
 
@@ -317,8 +318,6 @@ pointing at the APK.
 
 # Deploying
 
-`DEPLOY.md` has the click-by-click guide. This is the shape of it and the parts that are easy to
-get wrong.
 
 **Three pieces:** a Neon PostgreSQL database, a Vercel project for the API (root directory
 `apps/backend`), and a Vercel project for the web (root directory `apps/web`).
@@ -485,7 +484,7 @@ The role travels inside the access token, so log out and back in afterwards.
 ## Authors
 
 - **Alejandro Mier** — [github.com/Cachureto](https://github.com/Cachureto)
-- **Juan Villaquiran** — [github.com/pipeeex](https://github.com/pipeeex)
+- **Felipe Villaquiran** — [github.com/pipeeex](https://github.com/pipeeex)
 - **Gabriel Badillo** — [github.com/gabrielbadillo123](https://github.com/gabrielbadillo123)
 
 ## License
