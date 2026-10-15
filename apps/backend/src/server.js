@@ -8,11 +8,11 @@ import { pool } from './db/pool.js';
 // base está mal, es mejor que cada petición falle con su propio mensaje.
 pool
   .query('SELECT 1')
-  .then(() => console.log('✅ Conectado a PostgreSQL'))
-  .catch((err) => console.error('⚠️  Sin conexión a PostgreSQL:', err.message));
+  .then(() => console.log('Conectado a PostgreSQL'))
+  .catch((err) => console.error('Sin conexión a PostgreSQL:', err.message));
 
 const server = app.listen(env.PORT, () => {
-  console.log(`🚀 Vokter API en http://localhost:${env.PORT}`);
+  console.log(`Vokter API en http://localhost:${env.PORT}`);
 });
 
 const shutdown = async () => {
