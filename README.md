@@ -178,45 +178,8 @@ On a brand-new container Docker already ran those files on first boot, so this j
 and finishes. It matters later: run it after every `git pull` that brings a new migration, and
 **you never need to delete the database to update the schema.**
 
-### 5. Load the catalog
 
-```bash
-npm run db:seed
-```
-
-40 demo products, 6 categories and 3 drops. Idempotent, so running it twice doesn't duplicate
-anything. Prices and stock are demo values.
-
-If you want the **same catalog as the rest of the team**, restore the committed snapshot instead:
-
-```bash
-npm run db:restore
-```
-
-> **`db:restore` only ever touches your local container.** The script is hardcoded to
-> `docker exec -i nova-db psql -U nova -d nova`, so it cannot reach a remote database — and it
-> must not. `dump-latest.sql` is a `pg_dump --clean` snapshot: it runs `DROP TABLE` on all 16
-> tables before recreating them. Against production that would delete every account, order and
-> session. See [Changing the catalog in production](#changing-the-catalog-in-production).
-
-The dump excludes account data (users, tokens, orders, reviews) on purpose, so it carries no
-personal data and is safe to commit.
-
-To regenerate it after changing the catalog, run this from the repository root:
-
-```bash
-docker exec nova-db pg_dump -U nova -d nova --clean --if-exists --no-owner --no-acl \
-  --exclude-table-data=users --exclude-table-data=refresh_tokens --exclude-table-data=push_tokens \
-  --exclude-table-data=orders --exclude-table-data=order_items --exclude-table-data=reviews \
-  --exclude-table-data=authenticity_checks --exclude-table-data=ai_tool_calls --exclude-table-data=drop_waitlist \
-  | findstr /v "^COMMENT ON EXTENSION" > apps/backend/db/dump-latest.sql
-```
-
-**Do not drop `--no-owner --no-acl`.** Without them the dump carries `ALTER … OWNER TO nova`, and
-restoring it anywhere the owner is a different role fails with `must be able to SET ROLE "nova"`.
-This has already happened once after someone regenerated the file by hand.
-
-### 6. Run web and backend
+### 5. Run web and backend
 
 ```bash
 npm run dev
