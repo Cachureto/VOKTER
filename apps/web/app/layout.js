@@ -24,6 +24,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" className="h-full antialiased">
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
+        {/* Red de seguridad para todo lo que anima Motion: escribe opacity: 0
+            ya en el HTML del servidor, y sin JavaScript nadie lo volvería a
+            encender. `data-page-enter` es el contenedor de la transición de
+            página: si se quedara apagado, la web entera saldría en negro.
+            Esta regla solo se aplica cuando el navegador no ejecuta scripts. */}
+        <noscript>
+          <style>{`[data-reveal],[data-page-enter]{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
         <AuthProvider>
           <CartProvider>
             <Navbar />

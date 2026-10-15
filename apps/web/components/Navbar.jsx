@@ -7,12 +7,20 @@ import { LayoutDashboard, LogOut, Menu, Package, ShieldCheck, ShoppingBag, Spark
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import Logo from './Logo';
+import Marquee from './motion/Marquee';
 
 const LINKS = [
   { href: '/catalog', label: 'Catálogo' },
   { href: '/drops', label: 'Drops' },
   { href: '/search', label: 'Asistente IA', icon: Sparkles },
   { href: '/download', label: 'App' },
+];
+
+const ANUNCIOS = [
+  'Cada producto con código de autenticidad verificable',
+  'Envíos a toda Colombia',
+  'Asistente de IA que solo responde con el catálogo real',
+  'Drops con lista de espera y aviso al móvil',
 ];
 
 function UserMenu({ user, logout }) {
@@ -122,14 +130,19 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Barra de anuncio en marquesina. Antes era una línea fija y centrada
+          que se cortaba en móvil; ahora el mensaje completo pasa en todas las
+          anchuras, y se detiene al pasar el cursor para poder leerlo. */}
       <div className="border-b border-border bg-surface">
-        <div className="container-page flex h-9 items-center justify-center gap-2 text-xs text-muted">
-          <ShieldCheck size={14} className="text-live" />
-          <span>
-            Cada producto con <span className="font-medium text-foreground">código de autenticidad verificable</span>
-            <span className="hidden sm:inline"> · Envíos a toda Colombia</span>
-          </span>
-        </div>
+        <Marquee speed="30s" className="h-9 items-center text-xs text-muted">
+          {ANUNCIOS.map((texto, i) => (
+            <span key={i} className="flex items-center gap-2 px-6 whitespace-nowrap">
+              <ShieldCheck size={13} className="shrink-0 text-live" />
+              <span>{texto}</span>
+              <span className="text-subtle">/</span>
+            </span>
+          ))}
+        </Marquee>
       </div>
 
       <header
@@ -145,8 +158,9 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
-                className={`flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors ${
-                  isActive(href) ? 'bg-surface-hover text-foreground' : 'text-muted hover:text-foreground'
+                data-active={isActive(href)}
+                className={`link-sweep flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors duration-200 ${
+                  isActive(href) ? 'text-foreground' : 'text-muted hover:text-foreground'
                 }`}
               >
                 {Icon && <Icon size={15} className="text-accent" />}

@@ -1,28 +1,114 @@
 @import "tailwindcss";
 
 /* =====================================================================
-   NOVA · Sistema de diseño
-   Base oscura tipo "vitrina nocturna", un único acento (azul eléctrico) y un
-   verde de verificación reservado para autenticidad.
+   Vokter · Sistema de diseño
+   Base oscura tipo "vitrina nocturna" con tres colores: negro, blanco y el
+   azul de marca. El blanco es un color de primera, no solo el del texto:
+   aparece en bordes, superficies, estados hover y detalles tipográficos.
+   El verde queda reservado para autenticidad.
    ===================================================================== */
 
 :root {
-  --background: #09090b;
-  --surface: #111114;
-  --surface-2: #16161a;
-  --surface-hover: #1c1c21;
-  --border: #232329;
-  --border-strong: #33333b;
-  --foreground: #f5f5f0;
-  --muted: #a1a1aa;
-  --subtle: #6b6b75;
+  /* --- Negros --------------------------------------------------------
+     El fondo baja un punto respecto a la versión anterior (#09090b) para
+     que el blanco puro y el azul tengan más contra qué recortarse. */
+  --background: #050507;
+  --surface: #0d0d10;
+  --surface-2: #141419;
+  --surface-hover: #1b1b22;
+
+  /* --- Blancos -------------------------------------------------------
+     Antes el texto era hueso (#f5f5f0) y no había ni un borde blanco. Ahora
+     hay una escala: blanco puro para lo que debe destacar, y versiones
+     apagadas para el resto. Los bordes son blanco con alfa ya resuelto a
+     hex, para que los modificadores de opacidad de Tailwind sigan
+     funcionando sobre ellos. */
+  --foreground: #ffffff;
+  --muted: #a7a7b4;
+  --subtle: #6e6e7c;
+  --border: #22222b;
+  --border-strong: #3d3d4b;
+  --border-bright: rgba(255, 255, 255, 0.28);
+  --tile: #ffffff;
+
+  /* --- Azul de marca -------------------------------------------------- */
   --accent: #00a2e8;
   --accent-hover: #33b8ef;
-  --accent-foreground: #09090b;
+  --accent-bright: #6fdcff;
+  --accent-foreground: #050507;
+
+  /* --- Semánticos ----------------------------------------------------- */
   --live: #3ee089;
   --danger: #ff6b6b;
   --warning: #ffc53d;
-  --tile: #f2f2ee;
+
+  /* --- Movimiento ------------------------------------------------------
+     Una sola curva para todo lo que entra o se levanta, y otra más seca
+     para los clics. Tenerlas como variables evita que cada componente
+     invente su propio easing y el conjunto se sienta descoordinado. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --marquee-duration: 38s;
+}
+
+/* =====================================================================
+   Keyframes
+   Van fuera de @theme para poder usarlas tanto desde las utilidades de
+   Tailwind como desde las clases de @layer components.
+   ===================================================================== */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1;   filter: blur(0px); }
+  50%      { opacity: 0.7; filter: blur(1px); }
+}
+
+/* El contenido va duplicado en dos pistas idénticas puestas en fila. Las dos
+   se desplazan su propia anchura completa: cuando la primera sale por la
+   izquierda, la segunda ocupa su sitio, y al reiniciar el ciclo lo que se ve
+   es idéntico, así que el salto es invisible. */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+@keyframes marquee-x-reverse {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Brillo que cruza un botón o una tarjeta en diagonal. */
+@keyframes shine-sweep {
+  from { transform: translateX(-130%) skewX(-20deg); }
+  to   { transform: translateX(260%) skewX(-20deg); }
+}
+
+/* Carga: una banda clara que recorre el bloque, en vez del parpadeo plano. */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* Para degradados de texto: mueve el degradado, no el texto. */
+@keyframes gradient-pan {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* Anillo que se expande desde un punto, para el indicador de "en vivo". */
+@keyframes ping-ring {
+  0%   { transform: scale(0.9); opacity: 0.7; }
+  70%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
 
 @theme inline {
@@ -37,6 +123,7 @@
   --color-subtle: var(--subtle);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-bright: var(--accent-bright);
   --color-accent-foreground: var(--accent-foreground);
   --color-live: var(--live);
   --color-danger: var(--danger);
@@ -45,30 +132,11 @@
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Unbounded Variable", "Inter Variable", ui-sans-serif, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
-  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 
-  @keyframes fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes neon-pulse {
-    0%,
-    100% {
-      opacity: 1;
-      filter: blur(0px);
-    }
-    50% {
-      opacity: 0.7;
-      filter: blur(1px);
-    }
-  }
+  --animate-fade-up: fade-up 0.6s var(--ease-out-soft) both;
+  --animate-float: float-y 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-gradient: gradient-pan 8s ease-in-out infinite;
 }
 
 html {
@@ -102,6 +170,9 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* Quien pide menos movimiento no recibe ninguno. Esto cubre el CSS; las
+   animaciones de Motion se desactivan con <MotionConfig reducedMotion="user">
+   en app/template.js. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -130,18 +201,56 @@ input[type="number"] {
     @apply font-display text-3xl font-semibold tracking-[-0.03em] sm:text-4xl;
   }
 
+  /* Titular en blanco puro que se desvanece hacia el azul. El degradado se
+     mueve despacio, así que el texto nunca está del todo quieto. */
+  .text-gradient {
+    background: linear-gradient(100deg, #ffffff 10%, var(--accent-bright) 45%, #ffffff 80%);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-pan 9s ease-in-out infinite;
+  }
+
   /* ---------- Botones ---------- */
+  /* Todos comparten el mismo gesto al pulsar (escala 0.97) para que la
+     página se sienta como un solo objeto y no como piezas sueltas. */
   .btn-primary {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full bg-accent px-6 text-sm font-semibold text-accent-foreground shadow-[0_0_18px_-4px_rgba(0,162,232,0.65)] transition-all duration-200 hover:bg-accent-hover hover:shadow-[0_0_36px_-4px_rgba(0,162,232,0.85)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none;
+    @apply relative inline-flex h-11 items-center justify-center gap-2 overflow-hidden rounded-full bg-accent px-6 text-sm font-semibold text-accent-foreground shadow-[0_0_18px_-4px_rgba(0,162,232,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-[0_8px_36px_-6px_rgba(0,162,232,0.9)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none;
   }
+  /* El brillo vive en un pseudo-elemento y solo corre al pasar el cursor,
+     así no hay una animación infinita consumiendo CPU en cada botón. */
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: translateX(-130%) skewX(-20deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .btn-primary:hover::after {
+    opacity: 1;
+    animation: shine-sweep 0.9s var(--ease-out-soft);
+  }
+
   .btn-secondary {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border-strong bg-surface px-6 text-sm font-semibold text-foreground transition-all duration-200 hover:border-foreground/40 hover:bg-surface-hover active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border-strong bg-surface px-6 text-sm font-semibold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-white/50 hover:bg-surface-hover hover:shadow-[0_8px_28px_-10px_rgba(255,255,255,0.25)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
+
+  /* Botón blanco: la forma más directa de meter blanco en una página oscura
+     sin tocar la estructura. Para la acción principal cuando el azul ya está
+     ocupado en el mismo bloque. */
+  .btn-white {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_34px_-8px_rgba(255,255,255,0.45)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
+  }
+
   .btn-ghost {
-    @apply inline-flex h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-medium text-muted transition-colors hover:bg-surface-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40;
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-medium text-muted transition-all duration-200 hover:bg-surface-hover hover:text-foreground active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
   }
   .icon-btn {
-    @apply relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-surface-hover;
+    @apply relative inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-all duration-200 hover:bg-surface-hover hover:text-white active:scale-90;
   }
 
   /* ---------- Superficies ---------- */
@@ -149,15 +258,58 @@ input[type="number"] {
     @apply rounded-2xl border border-border bg-surface;
   }
   .card-interactive {
-    @apply rounded-2xl border border-border bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface-2;
+    @apply rounded-2xl border border-border bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-surface-2 hover:shadow-[0_24px_48px_-28px_rgba(0,0,0,0.9)];
   }
   .product-tile {
     @apply relative overflow-hidden rounded-xl bg-tile;
   }
 
+  /* Un filo blanco en el borde superior. Es el detalle que más "producto
+     terminado" aporta por línea de CSS: sugiere una luz cenital sobre la
+     tarjeta. */
+  .edge-light {
+    position: relative;
+  }
+  .edge-light::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    opacity: 0.5;
+    transition: opacity 0.35s var(--ease-out-soft);
+    pointer-events: none;
+  }
+  .edge-light:hover::before {
+    opacity: 1;
+  }
+
+  /* Destello que cruza la foto de un producto al pasar el cursor. Va en un
+     elemento propio y no en un pseudo-elemento de la imagen para poder
+     recortarlo con el redondeado del tile. */
+  .tile-shine {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 65%
+    );
+    transform: translateX(-130%) skewX(-20deg);
+  }
+  .group:hover .tile-shine {
+    opacity: 1;
+    animation: shine-sweep 0.85s var(--ease-out-soft);
+  }
+
   /* ---------- Formularios ---------- */
   .input {
-    @apply h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground transition-colors placeholder:text-subtle hover:border-border-strong focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none disabled:opacity-50;
+    @apply h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground transition-all duration-200 placeholder:text-subtle hover:border-border-strong focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none disabled:opacity-50;
   }
   textarea.input {
     @apply h-auto py-3;
@@ -172,11 +324,15 @@ input[type="number"] {
 
   /* ---------- Badges ---------- */
   .badge {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/80 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-muted;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/80 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-muted transition-colors duration-200;
   }
   .badge-accent {
     @apply inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-accent shadow-[0_0_10px_-1px_rgba(0,162,232,0.6)];
     text-shadow: 0 0 8px rgba(0, 162, 232, 0.6);
+  }
+  /* Blanco sobre negro, sin azul: para etiquetas neutras que deban pesar. */
+  .badge-white {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-white backdrop-blur;
   }
   .badge-live {
     @apply inline-flex items-center gap-1.5 rounded-full border border-live/30 bg-live/10 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-live;
@@ -188,10 +344,46 @@ input[type="number"] {
     @apply inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-warning;
   }
 
+  /* Punto latiendo para "en vivo". El anillo es un hijo con ::after. */
+  .live-dot {
+    @apply relative inline-flex h-2 w-2 shrink-0 rounded-full bg-live;
+  }
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: var(--live);
+    animation: ping-ring 1.8s var(--ease-out-soft) infinite;
+  }
+
   /* ---------- Enlaces ---------- */
   .link {
     @apply font-medium text-accent underline-offset-4 hover:underline;
     text-shadow: 0 0 10px rgba(0, 162, 232, 0.45);
+  }
+
+  /* Subrayado que crece desde la izquierda. Se usa en la navegación: marca
+     el hover sin cambiar el color ni mover el texto, que es lo que hace que
+     una barra se sienta estable. */
+  .link-sweep {
+    position: relative;
+  }
+  .link-sweep::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    height: 1.5px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--ease-out-soft);
+  }
+  .link-sweep:hover::after,
+  .link-sweep[data-active="true"]::after {
+    transform: scaleX(1);
   }
 
   /* ---------- Alertas ---------- */
@@ -202,15 +394,41 @@ input[type="number"] {
     @apply flex items-start gap-3 rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger;
   }
 
+  /* ---------- Marquesina ----------
+     CSS puro: la pista lleva el contenido duplicado y se desplaza un 50 %.
+     No usa JavaScript, así que funciona en componentes de servidor y no
+     añade nada al bundle. Se detiene al pasar el cursor para poder leerla. */
+  .marquee {
+    @apply relative flex overflow-hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .marquee-track {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    /* Con poco contenido la pista seguiría siendo más corta que la pantalla
+       y se vería el hueco; esto la obliga a cubrirla. */
+    min-width: 100%;
+    animation: marquee-x var(--marquee-duration) linear infinite;
+  }
+  .marquee[data-direction="right"] .marquee-track {
+    animation-name: marquee-x-reverse;
+  }
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+
   /* ---------- Fondos decorativos ---------- */
   .bg-grid {
     background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
     background-size: 56px 56px;
   }
   .bg-dots {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 22px 22px;
   }
   .mask-fade {
@@ -220,7 +438,17 @@ input[type="number"] {
     background: radial-gradient(closest-side, rgba(0, 162, 232, 0.38), transparent);
     animation: neon-pulse 3.5s ease-in-out infinite;
   }
+
+  /* Carga con banda en movimiento en vez de parpadeo. */
   .skeleton {
-    @apply animate-pulse rounded-xl bg-surface-hover;
+    @apply rounded-xl bg-surface-hover;
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.07) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
   }
 }

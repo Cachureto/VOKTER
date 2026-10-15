@@ -13,10 +13,14 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { categoryIcon } from '@/lib/categories';
-import { formatCOP, formatDate, formatNumber } from '@/lib/format';
+import { formatCOP, formatDate } from '@/lib/format';
 import ProductGrid from '@/components/ProductGrid';
 import SectionHeading from '@/components/SectionHeading';
 import Countdown from '@/components/Countdown';
+import Marquee from '@/components/motion/Marquee';
+import Reveal from '@/components/motion/Reveal';
+import Counter from '@/components/motion/Counter';
+import HeroShowcase from '@/components/motion/HeroShowcase';
 
 // Stock, drops y listas de espera cambian a cada rato: se renderiza en cada visita, nunca en el build
 export const dynamic = 'force-dynamic';
@@ -51,65 +55,19 @@ const TRUST = [
 
 const AI_SUGGESTIONS = ['Power bank para viajar', 'Algo para jugar en la TV', 'Soporte de celular para la moto'];
 
-function HeroVisual({ products }) {
-  const [main, second, third] = products;
-  if (!main) return null;
+// Palabras de la marquesina. Son las categorías y las promesas de la tienda:
+// lo mismo que se diría en un escaparate.
+const TICKER = [
+  'Autenticidad verificada',
+  'Sneakers',
+  'Audio',
+  'Ropa urbana',
+  'Accesorios',
+  'Drops limitados',
+  'Hogar',
+  'Envíos a toda Colombia',
+];
 
-  return (
-    <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
-      <div className="grid aspect-[6/5] grid-cols-5 grid-rows-2 gap-3 sm:gap-4">
-        <Link href={`/products/${main.slug}`} className="product-tile group col-span-3 row-span-2 rounded-3xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={main.coverUrl}
-            alt={main.name}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        </Link>
-        {[second, third].filter(Boolean).map((p) => (
-          <Link key={p.id} href={`/products/${p.slug}`} className="product-tile group col-span-2 rounded-3xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={p.coverUrl}
-              alt={p.name}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-          </Link>
-        ))}
-      </div>
-
-      {/* Certificado flotante */}
-      <div className="absolute -bottom-6 left-3 w-[min(19rem,85%)] animate-fade-up rounded-2xl border border-border-strong bg-background/90 p-4 shadow-2xl shadow-black/70 backdrop-blur-xl sm:-left-6">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-live/15 text-live">
-            <BadgeCheck size={22} />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Certificado Vokter</p>
-            <p className="truncate font-mono text-xs text-muted">{main.authenticityCode}</p>
-          </div>
-        </div>
-        <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs">
-          <span className="truncate pr-2 text-muted">{main.name}</span>
-          <span className="badge-live shrink-0">Activo</span>
-        </div>
-      </div>
-
-      {/* Chip del asistente */}
-      <div
-        className="absolute -top-4 right-3 hidden animate-fade-up items-center gap-2 rounded-full border border-border-strong bg-background/90 py-2 pr-4 pl-2 text-xs shadow-xl backdrop-blur-xl sm:flex"
-        style={{ animationDelay: '150ms' }}
-      >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground">
-          <Sparkles size={14} />
-        </span>
-        <span className="text-muted">
-          IA: <span className="text-foreground">solo productos reales</span>
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export default async function HomePage() {
   const { products, total, categories, liveDrop, nextDrop, activeDrops } = await getHomeData();
@@ -141,7 +99,7 @@ export default async function HomePage() {
 
             <h1 className="display mt-6 text-[2.75rem] leading-[0.95] sm:text-6xl lg:text-7xl">
               Original
-              <br />o no es <span className="text-accent">Vokter.</span>
+              <br />o no es <span className="text-gradient">Vokter.</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
@@ -158,41 +116,67 @@ export default async function HomePage() {
               </Link>
             </div>
 
+            {/* Las tres cifras cuentan desde cero al entrar en pantalla. El
+                valor final ya viene renderizado del servidor, así que sin
+                JavaScript se sigue leyendo el número correcto. */}
             <dl className="mt-12 grid max-w-lg grid-cols-3 divide-x divide-border border-t border-border pt-6">
               <div className="pr-4">
                 <dt className="eyebrow">Productos</dt>
-                <dd className="mt-1.5 font-display text-2xl font-semibold sm:text-3xl">{formatNumber(total)}</dd>
+                <dd className="mt-1.5 font-display text-2xl font-semibold sm:text-3xl">
+                  <Counter value={total} />
+                </dd>
               </div>
               <div className="px-4">
                 <dt className="eyebrow">Con código</dt>
-                <dd className="mt-1.5 font-display text-2xl font-semibold sm:text-3xl">100%</dd>
+                <dd className="mt-1.5 font-display text-2xl font-semibold sm:text-3xl">
+                  <Counter value={100} suffix="%" />
+                </dd>
               </div>
               <div className="pl-4">
                 <dt className="eyebrow">Drops activos</dt>
-                <dd className="mt-1.5 font-display text-2xl font-semibold sm:text-3xl">{activeDrops.length}</dd>
+                <dd className="mt-1.5 font-display text-2xl font-semibold sm:text-3xl">
+                  <Counter value={activeDrops.length} />
+                </dd>
               </div>
             </dl>
           </div>
 
-          <HeroVisual products={products} />
+          <HeroShowcase products={products} />
         </div>
       </section>
 
       {/* ================= FRANJA DE CONFIANZA ================= */}
       <section className="border-b border-border bg-surface/40">
         <div className="container-page grid grid-cols-2 gap-x-6 gap-y-6 py-8 lg:grid-cols-4">
-          {TRUST.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="flex items-center gap-3.5">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-accent">
+          {TRUST.map(({ icon: Icon, title, text }, i) => (
+            <Reveal key={title} delay={i * 0.08} className="group flex items-center gap-3.5">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-accent transition-all duration-300 group-hover:-translate-y-0.5 group-hover:border-white/30 group-hover:text-accent-bright">
                 <Icon size={20} />
               </span>
               <div className="min-w-0">
                 <p className="text-sm font-semibold">{title}</p>
                 <p className="text-xs text-muted sm:text-sm">{text}</p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ================= TICKER ================= */}
+      {/* Tipografía grande en contorno blanco: mete blanco en la página sin
+          encender una superficie entera, y el movimiento continuo rompe la
+          quietud entre dos bloques estáticos. */}
+      <section className="border-b border-border bg-background py-5">
+        <Marquee speed="42s" className="select-none">
+          {TICKER.map((palabra, i) => (
+            <span key={i} className="flex items-center gap-8 px-8">
+              <span className="font-display text-2xl font-semibold tracking-[-0.02em] text-white/85 sm:text-3xl">
+                {palabra}
+              </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            </span>
+          ))}
+        </Marquee>
       </section>
 
       {/* ================= CATEGORÍAS ================= */}

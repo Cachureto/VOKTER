@@ -1,4 +1,5 @@
 node_modules
+Claude outputs/
 .env
 .env.local
 dist
