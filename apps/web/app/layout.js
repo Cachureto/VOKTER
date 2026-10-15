@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 
 export const metadata = {
   title: {
-    default: 'Vokter — Tecnología urbana con autenticidad verificada',
+    default: 'Vokter',
     template: '%s · Vokter',
   },
   description:
