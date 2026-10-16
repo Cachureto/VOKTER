@@ -93,6 +93,44 @@ export async function createDrop(input) {
   return getDrop(dropId);
 }
 
+const DROP_COLUMNS = {
+  name: 'name',
+  description: 'description',
+  coverUrl: 'cover_url',
+  launchAt: 'launch_at',
+  endsAt: 'ends_at',
+};
+
+export async function updateDrop(idOrSlug, input) {
+  const isId = UUID_RE.test(idOrSlug);
+  const { rows: current } = await query(`SELECT id FROM drops WHERE ${isId ? 'id' : 'slug'} = $1`, [idOrSlug]);
+  if (!current[0]) throw notFound('Drop no encontrado');
+  const dropId = current[0].id;
+
+  await withTransaction(async (db) => {
+    const sets = [];
+    const params = [];
+    for (const [key, column] of Object.entries(DROP_COLUMNS)) {
+      if (input[key] === undefined) continue;
+      params.push(input[key]);
+      sets.push(`${column} = $${params.length}`);
+    }
+    if (sets.length) {
+      params.push(dropId);
+      await db.query(`UPDATE drops SET ${sets.join(', ')} WHERE id = $${params.length}`, params);
+    }
+
+    if (input.productIds) {
+      await db.query('DELETE FROM drop_products WHERE drop_id = $1', [dropId]);
+      for (const productId of input.productIds) {
+        await db.query('INSERT INTO drop_products (drop_id, product_id) VALUES ($1,$2)', [dropId, productId]);
+      }
+    }
+  });
+
+  return getDrop(dropId);
+}
+
 export async function updateDropStatus(idOrSlug, status) {
   const isId = UUID_RE.test(idOrSlug);
   const { rows } = await query(`UPDATE drops SET status = $1 WHERE ${isId ? 'id' : 'slug'} = $2 RETURNING id`, [

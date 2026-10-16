@@ -135,6 +135,7 @@ CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
 -- Name: EXTENSION citext; Type: COMMENT; Schema: -; Owner: 
 --
 
+COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';
 
 
 --
@@ -148,6 +149,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 -- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner: 
 --
 
+COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
 
 
 --
@@ -161,6 +163,7 @@ CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;
 -- Name: EXTENSION unaccent; Type: COMMENT; Schema: -; Owner: 
 --
 
+COMMENT ON EXTENSION unaccent IS 'text search dictionary that removes accents';
 
 
 --
@@ -174,6 +177,7 @@ CREATE TYPE public.authenticity_status AS ENUM (
 );
 
 
+ALTER TYPE public.authenticity_status OWNER TO nova;
 
 --
 -- Name: drop_status; Type: TYPE; Schema: public; Owner: nova
@@ -188,6 +192,7 @@ CREATE TYPE public.drop_status AS ENUM (
 );
 
 
+ALTER TYPE public.drop_status OWNER TO nova;
 
 --
 -- Name: order_status; Type: TYPE; Schema: public; Owner: nova
@@ -203,6 +208,7 @@ CREATE TYPE public.order_status AS ENUM (
 );
 
 
+ALTER TYPE public.order_status OWNER TO nova;
 
 --
 -- Name: push_platform; Type: TYPE; Schema: public; Owner: nova
@@ -215,6 +221,7 @@ CREATE TYPE public.push_platform AS ENUM (
 );
 
 
+ALTER TYPE public.push_platform OWNER TO nova;
 
 --
 -- Name: unit_status; Type: TYPE; Schema: public; Owner: nova
@@ -229,6 +236,7 @@ CREATE TYPE public.unit_status AS ENUM (
 );
 
 
+ALTER TYPE public.unit_status OWNER TO nova;
 
 --
 -- Name: user_role; Type: TYPE; Schema: public; Owner: nova
@@ -241,6 +249,7 @@ CREATE TYPE public.user_role AS ENUM (
 );
 
 
+ALTER TYPE public.user_role OWNER TO nova;
 
 --
 -- Name: waitlist_status; Type: TYPE; Schema: public; Owner: nova
@@ -254,6 +263,7 @@ CREATE TYPE public.waitlist_status AS ENUM (
 );
 
 
+ALTER TYPE public.waitlist_status OWNER TO nova;
 
 --
 -- Name: immutable_unaccent(text); Type: FUNCTION; Schema: public; Owner: nova
@@ -264,6 +274,7 @@ CREATE FUNCTION public.immutable_unaccent(text) RETURNS text
     AS $_$ SELECT public.unaccent('public.unaccent'::regdictionary, $1) $_$;
 
 
+ALTER FUNCTION public.immutable_unaccent(text) OWNER TO nova;
 
 --
 -- Name: set_updated_at(); Type: FUNCTION; Schema: public; Owner: nova
@@ -274,6 +285,7 @@ CREATE FUNCTION public.set_updated_at() RETURNS trigger
     AS $$ BEGIN NEW.updated_at := now(); RETURN NEW; END $$;
 
 
+ALTER FUNCTION public.set_updated_at() OWNER TO nova;
 
 SET default_tablespace = '';
 
@@ -295,6 +307,7 @@ CREATE TABLE public.ai_tool_calls (
 );
 
 
+ALTER TABLE public.ai_tool_calls OWNER TO nova;
 
 --
 -- Name: ai_tool_calls_id_seq; Type: SEQUENCE; Schema: public; Owner: nova
@@ -308,6 +321,7 @@ CREATE SEQUENCE public.ai_tool_calls_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.ai_tool_calls_id_seq OWNER TO nova;
 
 --
 -- Name: ai_tool_calls_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nova
@@ -335,6 +349,7 @@ CREATE TABLE public.authenticity_checks (
 );
 
 
+ALTER TABLE public.authenticity_checks OWNER TO nova;
 
 --
 -- Name: authenticity_checks_id_seq; Type: SEQUENCE; Schema: public; Owner: nova
@@ -348,6 +363,7 @@ CREATE SEQUENCE public.authenticity_checks_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.authenticity_checks_id_seq OWNER TO nova;
 
 --
 -- Name: authenticity_checks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nova
@@ -368,6 +384,7 @@ CREATE TABLE public.categories (
 );
 
 
+ALTER TABLE public.categories OWNER TO nova;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: nova
@@ -382,6 +399,7 @@ CREATE SEQUENCE public.categories_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.categories_id_seq OWNER TO nova;
 
 --
 -- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nova
@@ -404,6 +422,7 @@ CREATE TABLE public.drop_products (
 );
 
 
+ALTER TABLE public.drop_products OWNER TO nova;
 
 --
 -- Name: drop_waitlist; Type: TABLE; Schema: public; Owner: nova
@@ -418,6 +437,7 @@ CREATE TABLE public.drop_waitlist (
 );
 
 
+ALTER TABLE public.drop_waitlist OWNER TO nova;
 
 --
 -- Name: drops; Type: TABLE; Schema: public; Owner: nova
@@ -439,6 +459,7 @@ CREATE TABLE public.drops (
 );
 
 
+ALTER TABLE public.drops OWNER TO nova;
 
 --
 -- Name: order_items; Type: TABLE; Schema: public; Owner: nova
@@ -457,6 +478,7 @@ CREATE TABLE public.order_items (
 );
 
 
+ALTER TABLE public.order_items OWNER TO nova;
 
 --
 -- Name: orders; Type: TABLE; Schema: public; Owner: nova
@@ -478,6 +500,7 @@ CREATE TABLE public.orders (
 );
 
 
+ALTER TABLE public.orders OWNER TO nova;
 
 --
 -- Name: product_images; Type: TABLE; Schema: public; Owner: nova
@@ -492,6 +515,7 @@ CREATE TABLE public.product_images (
 );
 
 
+ALTER TABLE public.product_images OWNER TO nova;
 
 --
 -- Name: product_units; Type: TABLE; Schema: public; Owner: nova
@@ -509,6 +533,7 @@ CREATE TABLE public.product_units (
 );
 
 
+ALTER TABLE public.product_units OWNER TO nova;
 
 --
 -- Name: products; Type: TABLE; Schema: public; Owner: nova
@@ -537,6 +562,7 @@ CREATE TABLE public.products (
 );
 
 
+ALTER TABLE public.products OWNER TO nova;
 
 --
 -- Name: push_tokens; Type: TABLE; Schema: public; Owner: nova
@@ -553,6 +579,7 @@ CREATE TABLE public.push_tokens (
 );
 
 
+ALTER TABLE public.push_tokens OWNER TO nova;
 
 --
 -- Name: refresh_tokens; Type: TABLE; Schema: public; Owner: nova
@@ -570,6 +597,7 @@ CREATE TABLE public.refresh_tokens (
 );
 
 
+ALTER TABLE public.refresh_tokens OWNER TO nova;
 
 --
 -- Name: reviews; Type: TABLE; Schema: public; Owner: nova
@@ -590,6 +618,7 @@ CREATE TABLE public.reviews (
 );
 
 
+ALTER TABLE public.reviews OWNER TO nova;
 
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: nova
@@ -620,6 +649,7 @@ CREATE TABLE public.users (
 );
 
 
+ALTER TABLE public.users OWNER TO nova;
 
 --
 -- Name: v_authenticity_lookup; Type: VIEW; Schema: public; Owner: nova
@@ -646,6 +676,7 @@ UNION ALL
      JOIN public.products p ON ((p.id = u.product_id)));
 
 
+ALTER VIEW public.v_authenticity_lookup OWNER TO nova;
 
 --
 -- Name: v_catalog; Type: VIEW; Schema: public; Owner: nova
@@ -683,6 +714,7 @@ CREATE VIEW public.v_catalog AS
   WHERE p.is_published;
 
 
+ALTER VIEW public.v_catalog OWNER TO nova;
 
 --
 -- Name: ai_tool_calls id; Type: DEFAULT; Schema: public; Owner: nova
@@ -724,8 +756,8 @@ COPY public.categories (id, slug, name, parent_id) FROM stdin;
 --
 
 COPY public.drop_products (drop_id, product_id, allocation, max_per_user) FROM stdin;
-1927db58-289c-4bed-8eac-5c4c596796a7	422969ec-15d3-4ba9-934e-3fe4bcce2865	\N	1
 ef043ba2-99c1-401f-903b-e8b8433858ef	cd910b9c-718e-4f9a-934c-0efde4854dd8	\N	1
+1927db58-289c-4bed-8eac-5c4c596796a7	422969ec-15d3-4ba9-934e-3fe4bcce2865	\N	1
 \.
 
 
@@ -734,8 +766,8 @@ ef043ba2-99c1-401f-903b-e8b8433858ef	cd910b9c-718e-4f9a-934c-0efde4854dd8	\N	1
 --
 
 COPY public.drops (id, name, slug, description, cover_url, launch_at, ends_at, status, announced_at, created_at, updated_at) FROM stdin;
-1927db58-289c-4bed-8eac-5c4c596796a7	Vokter Winter Drop	nova-winter-drop	Lanzamiento exclusivo de edición limitada	\N	2026-12-01 18:00:00+00	\N	scheduled	\N	2026-09-16 21:00:38.49046+00	2026-09-17 21:11:48.294089+00
-ef043ba2-99c1-401f-903b-e8b8433858ef	Vokter Tech Drop	nova-tech-drop	Lanzamiento de accesorios tecnológicos GOLD.	\N	2026-12-15 23:00:00+00	\N	scheduled	\N	2026-09-16 22:28:22.345209+00	2026-09-17 21:11:48.294089+00
+1927db58-289c-4bed-8eac-5c4c596796a7	Vokter Winter Drop	nova-winter-drop	Lanzamiento exclusivo de edición limitada	/products/nova-runner-x.jpg	2026-12-01 18:00:00+00	\N	scheduled	\N	2026-09-16 21:00:38.49046+00	2026-10-16 19:59:45.079113+00
+ef043ba2-99c1-401f-903b-e8b8433858ef	Vokter Tech Drop	nova-tech-drop	Lanzamiento de accesorios tecnológicos GOLD.	/products/gold-cargador-25w-tipo-c.jpg	2026-12-15 23:00:00+00	\N	scheduled	\N	2026-09-16 22:28:22.345209+00	2026-10-16 20:00:27.515335+00
 \.
 
 
@@ -832,20 +864,20 @@ d617cf12-2ff9-416a-b4cb-1ef5730131ec	336e4480-c2e7-495e-ab67-4d2bc2c76bad	/produ
 5f3993f4-7add-415b-b216-066260f99dda	b53364cf-b721-4d3a-ba9f-f288e066643e	/products/parlante-portatil-s640.jpg	\N	0
 87e8b6b0-d88b-4cf8-9d32-9d3d34ec0b1c	c5da8f09-ff74-411b-a91d-04be5ec5863a	/products/audifonos-w01.jpg	\N	0
 6b642f5a-dc97-4752-96a7-288956df6d38	f437d7e4-ff55-4cf1-b4fc-c78b63aa1dbd	/products/audifonos-z1-bass.jpg	\N	0
-dc8c9e6f-b859-4df3-ac8f-6c87b5c3b376	6ca1ec68-b68f-4c30-9ca9-aa5674f749f5	/products/LV Skate Sneakers.jpg	\N	0
-b50919dc-e773-4b58-a191-f267378b4766	421910b4-9127-4238-a06b-59f6dd585caa	/products/LV Trainer.jpg	\N	0
-13ca221b-9f76-451b-8549-610872ec4b45	466ef47d-5938-4a9a-80ae-6e3ad60c5bd9	/products/Valentino V17n Bond.jpg	\N	0
-f0f91e46-a15e-4b1b-bb10-74a88c8e5ad5	599d4dc6-0d7f-4d86-9e7e-6271f90233a6	/products/LV Archlight Trainer.jpg	\N	0
-a5586fc6-f4d0-4e33-90a0-79fc7eb5a38a	2c40c6b9-93aa-4805-bff6-b360063a3759	/products/Valentino Garavani Diamante.jpg	\N	0
-5d0fa188-d0a4-410a-9a95-52ae3e1539df	99136778-2b83-4e0f-a8d0-3901759011d2	/products/Valentino Open Sneaker.jpg	\N	0
 52595fce-ec8f-497c-b5ef-f0826913e833	109bd2db-2dfb-43ee-80b3-040bf09bedde	/products/under-armour-valsetz.jpg	\N	0
 26f71561-f2c9-4908-874b-bdbb656367d2	5e8ea8c8-0d78-491a-979c-0c30a2eef8a5	/products/hoka-clifton-10.jpg	\N	0
 ce2103c1-d21d-4dac-9b82-3f9a8f93f2b3	551d642c-f850-457c-a8c2-2e5dcea59068	/products/skechers-mocasin.jpg	\N	0
 06a0f74a-6fdf-41d9-87a8-31bba6561c1d	4456a81a-50f8-4e56-9e00-85a0c55a3343	/products/hoka-skyflow.jpg	\N	0
 1e2f8947-3afe-425d-beb4-0b3d244e906e	0abcd794-108a-489f-896b-da7c610e8859	/products/hoka-gaviota.jpg	\N	0
 f437decd-cac9-4fa2-b8c1-46a2a0126053	27f93f64-a93c-4205-b23e-804bd29b4f24	/products/hoka-bondi-9.jpg	\N	0
-8355d943-86ac-408f-958c-dcf492b0cf1b	ec514607-8a58-4bad-8597-58c126562394	/products/nike-6976-conjunto.jpg	\N	0
+dc8c9e6f-b859-4df3-ac8f-6c87b5c3b376	6ca1ec68-b68f-4c30-9ca9-aa5674f749f5	/products/lv-skate-sneakers.png	\N	0
+b50919dc-e773-4b58-a191-f267378b4766	421910b4-9127-4238-a06b-59f6dd585caa	/products/lv-trainer.png	\N	0
+13ca221b-9f76-451b-8549-610872ec4b45	466ef47d-5938-4a9a-80ae-6e3ad60c5bd9	/products/valentino-v17n-bond.png	\N	0
+f0f91e46-a15e-4b1b-bb10-74a88c8e5ad5	599d4dc6-0d7f-4d86-9e7e-6271f90233a6	/products/lv-archlight-trainer.png	\N	0
+a5586fc6-f4d0-4e33-90a0-79fc7eb5a38a	2c40c6b9-93aa-4805-bff6-b360063a3759	/products/valentino-garavani-diamante.png	\N	0
+5d0fa188-d0a4-410a-9a95-52ae3e1539df	99136778-2b83-4e0f-a8d0-3901759011d2	/products/valentino-open-sneaker.png	\N	0
 3bb5b1dc-cb25-4708-8355-ba80e41fb0c8	34ae980e-ada8-4082-a087-c6ff9ce93e6f	/products/nike-conjunto-verde-negro.jpg	\N	0
+8355d943-86ac-408f-958c-dcf492b0cf1b	ec514607-8a58-4bad-8597-58c126562394	/products/nike-6976-conjunto.jpg	\N	0
 cff82a0b-3cc7-40cd-880d-0260159429c2	4fd1cc0c-9e3c-4ea7-b7fd-acd98a63e412	/products/adidas-h685-conjunto-dama.jpg	\N	0
 3708dc85-9598-47b2-931a-2382e4865f43	03bfc3c9-b6ea-43f8-ab2c-f77eff53be53	/products/nike-n8805-conjunto.jpg	\N	0
 0b47e902-eb7f-4b5e-8c0d-14a00e8dabe1	03ea46be-6558-4f6f-8237-3e54d61ad3e7	/products/nike-conjunto-rosa-negro.jpg	\N	0
@@ -899,12 +931,12 @@ e75e8dab-955c-40ac-91a2-20f4251848ac	Soporte para Moto Espejo	soporte-moto-espej
 4456a81a-50f8-4e56-9e00-85a0c55a3343	Hoka Skyflow	hoka-skyflow	1	Hoka	Tenis running Hoka Skyflow, ligero y responsivo para entrenamiento. Tallas 38-44.	270000	COP	9	VKT-VOKTER-HOKASKYFLOW-01	active	{}	t	2026-09-18 18:10:40.103151+00	2026-09-18 18:43:14.878334+00
 0abcd794-108a-489f-896b-da7c610e8859	Hoka Gaviota	hoka-gaviota	1	Hoka	Tenis running Hoka Gaviota, soporte y estabilidad para pisada pronada. Tallas 38-44.	260000	COP	14	VKT-VOKTER-HOKAGAVIOTA-01	active	{}	t	2026-09-18 18:10:40.103151+00	2026-09-18 18:43:36.93519+00
 27f93f64-a93c-4205-b23e-804bd29b4f24	Hoka Bondi 9	hoka-bondi-9	1	Hoka	Tenis running Hoka Bondi 9, máxima amortiguación para largas distancias. Tallas 38-44.	270000	COP	10	VKT-VOKTER-HOKABONDI9-01	active	{}	t	2026-09-18 18:10:40.103151+00	2026-09-18 18:44:20.191627+00
-6ca1ec68-b68f-4c30-9ca9-aa5674f749f5	LV Skate Sneakers	lv	1		Tenis LV Skate Sneakers Tallas 35-43.	210000	COP	11	VKT-VOKTER-URBAN01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-09-18 18:30:40.698929+00
-421910b4-9127-4238-a06b-59f6dd585caa	LV Trainer	trainer	1	Louis Vuitton	Tenis LV Trainer Tallas 35-43.	190000	COP	12	VKT-VOKTER-VELCRO01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-09-18 18:32:27.556342+00
-466ef47d-5938-4a9a-80ae-6e3ad60c5bd9	Valentino V17n Bond	v17n	1	Valentino	Tenis Valentino V17n Bond. Tallas 35-43.	170000	COP	15	VKT-VOKTER-CASUAL01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-09-18 18:41:16.948534+00
-599d4dc6-0d7f-4d86-9e7e-6271f90233a6	LV Archlight Trainer	archlight	1	Louis Vuitton	Tenis LV Archlight Trainer. Tallas 35-43.	270000	COP	9	VKT-VOKTER-CHUNK01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-09-18 18:41:51.948227+00
-2c40c6b9-93aa-4805-bff6-b360063a3759	Valentino Garavani Diamante	garavani	1	Valentino	Tenis Valentino Garavani Diamante. Tallas 35-43.	270000	COP	10	VKT-VOKTER-SKATE02-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-09-18 18:42:21.725284+00
-99136778-2b83-4e0f-a8d0-3901759011d2	Valentino Open Sneaker	open	1	Valentino	Tenis Valentino Open Sneaker. Tallas 35-43.	180000	COP	13	VKT-VOKTER-TRAIN03-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-09-18 18:42:47.267807+00
+6ca1ec68-b68f-4c30-9ca9-aa5674f749f5	LV Skate Sneakers	lv-skate-sneakers	1		Tenis LV Skate Sneakers Tallas 35-43.	210000	COP	11	VKT-VOKTER-URBAN01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-10-16 19:41:07.033695+00
+421910b4-9127-4238-a06b-59f6dd585caa	LV Trainer	lv-trainer	1	Louis Vuitton	Tenis LV Trainer Tallas 35-43.	190000	COP	12	VKT-VOKTER-VELCRO01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-10-16 19:41:07.033695+00
+466ef47d-5938-4a9a-80ae-6e3ad60c5bd9	Valentino V17n Bond	valentino-v17n-bond	1	Valentino	Tenis Valentino V17n Bond. Tallas 35-43.	170000	COP	15	VKT-VOKTER-CASUAL01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-10-16 19:41:07.033695+00
+599d4dc6-0d7f-4d86-9e7e-6271f90233a6	LV Archlight Trainer	lv-archlight-trainer	1	Louis Vuitton	Tenis LV Archlight Trainer. Tallas 35-43.	270000	COP	9	VKT-VOKTER-CHUNK01-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-10-16 19:41:07.033695+00
+2c40c6b9-93aa-4805-bff6-b360063a3759	Valentino Garavani Diamante	valentino-garavani-diamante	1	Valentino	Tenis Valentino Garavani Diamante. Tallas 35-43.	270000	COP	10	VKT-VOKTER-SKATE02-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-10-16 19:41:07.033695+00
+99136778-2b83-4e0f-a8d0-3901759011d2	Valentino Open Sneaker	valentino-open-sneaker	1	Valentino	Tenis Valentino Open Sneaker. Tallas 35-43.	180000	COP	13	VKT-VOKTER-TRAIN03-01	active	{}	t	2026-09-18 18:13:50.609914+00	2026-10-16 19:41:07.033695+00
 34ae980e-ada8-4082-a087-c6ff9ce93e6f	Nike Conjunto Verde/Negro	nike-conjunto-verde-negro	2	Nike	Conjunto deportivo Nike acolchado, verde y negro. Tallas S-XL.	145000	COP	14	VKT-VOKTER-NIKEVERDE-01	active	{}	t	2026-09-18 19:03:02.59791+00	2026-09-18 19:14:17.3942+00
 ec514607-8a58-4bad-8597-58c126562394	Nike 6976 Conjunto	nike-6976-conjunto	2	Nike	Conjunto deportivo Nike, chaqueta y pantalón. Tallas XL-4XL.	165000	COP	12	VKT-VOKTER-NIKE6976-01	active	{}	t	2026-09-18 19:03:02.59791+00	2026-09-18 19:12:33.531851+00
 4fd1cc0c-9e3c-4ea7-b7fd-acd98a63e412	Adidas H-685 Conjunto Dama	adidas-h685-conjunto-dama	2	Adidas	Conjunto deportivo Adidas para dama, buso y leggins. Tallas S-XL.	150000	COP	15	VKT-VOKTER-ADIH685-01	active	{}	t	2026-09-18 19:03:02.59791+00	2026-09-18 19:15:05.806584+00
@@ -1008,6 +1040,7 @@ COPY public.schema_migrations (filename, applied_at) FROM stdin;
 001_initial_schema.sql	2026-09-18 17:34:05.273097+00
 002_seed_categories.sql	2026-09-18 17:34:05.275119+00
 003_rename_codes_to_vkt.sql	2026-09-18 17:34:05.278883+00
+004_conjuntos_y_sneakers.sql	2026-10-16 19:41:07.144459+00
 \.
 
 

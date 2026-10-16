@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Bell, Package } from 'lucide-react';
+import { Bell, Package, Pencil } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { apiFetch } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -91,6 +91,13 @@ export default function AdminDropsPage() {
                   </option>
                 ))}
               </select>
+              <Link
+                href={`/admin/drops/${d.slug}/edit`}
+                className="icon-btn h-10 w-10 text-muted"
+                aria-label={`Editar ${d.name}`}
+              >
+                <Pencil size={16} />
+              </Link>
             </div>
           );
         })}

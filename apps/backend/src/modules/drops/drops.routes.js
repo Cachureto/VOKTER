@@ -1,7 +1,13 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
-import { createDropSchema, dropIdParamSchema, listDropsQuerySchema, updateDropStatusSchema } from './drops.schemas.js';
+import {
+  createDropSchema,
+  dropIdParamSchema,
+  listDropsQuerySchema,
+  updateDropSchema,
+  updateDropStatusSchema,
+} from './drops.schemas.js';
 import * as drops from './drops.service.js';
 
 const router = Router();
@@ -17,6 +23,16 @@ router.get('/:idOrSlug', validate({ params: dropIdParamSchema }), async (req, re
 router.post('/', requireAuth, requireRole('admin'), validate({ body: createDropSchema }), async (req, res) => {
   res.status(201).json(await drops.createDrop(req.valid.body));
 });
+
+router.patch(
+  '/:idOrSlug',
+  requireAuth,
+  requireRole('admin'),
+  validate({ params: dropIdParamSchema, body: updateDropSchema }),
+  async (req, res) => {
+    res.json(await drops.updateDrop(req.valid.params.idOrSlug, req.valid.body));
+  },
+);
 
 router.patch(
   '/:idOrSlug/status',
