@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Check, Search, SlidersHorizontal, X } from 'lucide-react';
+import ScrollPanel from './ScrollPanel';
 
 const SORTS = [
   { value: 'newest', label: 'Más nuevos' },
@@ -211,9 +212,13 @@ export default function FilterBar({ categories }) {
   return (
     <>
       <aside className="hidden lg:block">
-        <div className="sticky top-24">
+        {/* El panel se queda fijo bajo la barra superior y, si es más alto que
+            la ventana, se desliza por su cuenta: antes había que bajar hasta
+            el final de los productos para ver los últimos filtros.
+            7.5rem = los 6rem del top (barra de 4rem + aire) + 1.5rem de margen abajo. */}
+        <ScrollPanel className="sticky top-24 max-h-[calc(100dvh-7.5rem)]">
           <FilterPanel key={key} categories={categories} />
-        </div>
+        </ScrollPanel>
       </aside>
 
       <details className="group card lg:hidden">

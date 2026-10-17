@@ -593,3 +593,61 @@ input[type="number"] {
   background: #0d0d10;
   box-shadow: 0 2px 10px -5px rgba(10, 10, 14, 0.5);
 }
+
+/* ---------- Panel con scroll propio (filtros del catálogo) ----------
+   Va fuera de @layer a propósito: el margen negativo y el relleno tienen que
+   ganarle a cualquier utilidad. El relleno deja sitio al anillo de foco de
+   los inputs (que overflow recortaría) y a la barra de scroll; el margen
+   negativo lo compensa para que el panel siga alineado con la página. */
+@property --fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+.scroll-panel {
+  overflow-y: auto;
+  overscroll-behavior: contain; /* al llegar al final no arrastra la página */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-gutter: stable;
+  padding: 4px 10px 8px 4px;
+  margin: -4px -10px 0 -4px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+  transition:
+    --fade-top 0.25s var(--ease-out-soft),
+    --fade-bottom 0.25s var(--ease-out-soft);
+}
+.scroll-panel[data-fade-top="true"] {
+  --fade-top: 28px;
+}
+.scroll-panel[data-fade-bottom="true"] {
+  --fade-bottom: 44px;
+}
+.scroll-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-panel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+}
+.scroll-panel:hover::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+}
