@@ -14,7 +14,7 @@ import { apiFetch } from '../src/lib/api';
 import { useAuth } from '../src/lib/auth-context';
 import { ORDER_STATUS } from '../src/lib/cart-context';
 import { formatCOP } from '../src/lib/format';
-import { colors } from '../src/theme/colors';
+import { makeStyles, useTheme } from '../src/theme';
 
 const fecha = (iso) => {
   try {
@@ -30,6 +30,8 @@ const fecha = (iso) => {
 };
 
 export default function Pedidos() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const { user, ready } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -103,7 +105,7 @@ export default function Pedidos() {
         <View style={styles.center}>
           <Ionicons name="cube-outline" size={30} color={colors.subtle} />
           <Text style={styles.emptyTitle}>Todavía no tienes pedidos</Text>
-          <Pressable onPress={() => router.replace('/')} style={styles.button}>
+          <Pressable onPress={() => router.replace('/catalogo')} style={styles.button}>
             <Text style={styles.buttonText}>Ir al catálogo</Text>
           </Pressable>
         </View>
@@ -144,7 +146,7 @@ export default function Pedidos() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40, gap: 14 },
   center: {
@@ -194,4 +196,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: { color: colors.accentForeground, fontSize: 14.5, fontWeight: '700' },
-});
+}));

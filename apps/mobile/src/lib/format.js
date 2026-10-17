@@ -24,3 +24,18 @@ export function formatNumber(value) {
     return String(n);
   }
 }
+
+/** "16 de octubre de 2026" en hora de Bogotá, igual que la web. */
+export function formatDate(iso) {
+  const d = new Date(iso);
+  try {
+    return new Intl.DateTimeFormat('es-CO', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'America/Bogota',
+    }).format(d);
+  } catch {
+    return d.toLocaleDateString();
+  }
+}

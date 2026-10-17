@@ -13,9 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Field, PasswordField } from '../src/components/Field';
 import { useAuth } from '../src/lib/auth-context';
-import { colors } from '../src/theme/colors';
+import { makeStyles, useTheme } from '../src/theme';
 
 export default function Login() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -104,7 +106,7 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40 },
   title: { color: colors.foreground, fontSize: 32, fontWeight: '800', letterSpacing: -1 },
@@ -117,8 +119,8 @@ const styles = StyleSheet.create({
     padding: 13,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: 'rgba(255,107,107,0.3)',
-    backgroundColor: 'rgba(255,107,107,0.1)',
+    borderColor: colors.dangerLine,
+    backgroundColor: colors.dangerSoft,
   },
   alertText: { flex: 1, color: colors.danger, fontSize: 13.5, lineHeight: 19 },
   button: {
@@ -133,4 +135,4 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 24 },
   footerText: { color: colors.muted, fontSize: 14 },
   link: { color: colors.accent, fontSize: 14, fontWeight: '700' },
-});
+}));

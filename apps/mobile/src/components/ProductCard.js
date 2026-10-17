@@ -1,22 +1,38 @@
-import { memo } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { memo, useRef } from 'react';
+import { Animated, Image, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { resolveImage } from '../lib/api';
 import { formatCOP } from '../lib/format';
-import { colors } from '../theme/colors';
+import { makeStyles, palettes, useTheme } from '../theme';
+
+// Los chips van sobre la foto con fondo negro translúcido en los dos temas,
+// así que usan siempre los tonos del modo oscuro (los del claro son más
+// oscuros y sobre negro no se leerían).
+const SOBRE_FOTO = palettes.dark;
 
 function ProductCard({ product, width }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const image = resolveImage(product.coverUrl);
   const outOfStock = product.stock <= 0;
   const lowStock = !outOfStock && product.stock <= 5;
   const verified = product.authenticityStatus ? product.authenticityStatus === 'active' : true;
 
+  // Al presionar la tarjeta se hunde un poco y rebota al soltar: el
+  // equivalente táctil del "lift" que tiene en la web al pasar el cursor.
+  const scale = useRef(new Animated.Value(1)).current;
+  const animar = (toValue) =>
+    Animated.spring(scale, { toValue, speed: 40, bounciness: 7, useNativeDriver: true }).start();
+
   return (
+    <Animated.View style={{ width, transform: [{ scale }] }}>
     <Pressable
       onPress={() => router.push(`/product/${product.slug}`)}
-      style={({ pressed }) => [styles.card, { width }, pressed && { opacity: 0.75 }]}
+      onPressIn={() => animar(0.965)}
+      onPressOut={() => animar(1)}
+      style={({ pressed }) => [styles.card, pressed && { borderColor: colors.borderStrong }]}
     >
       <View style={styles.tile}>
         {image ? (
@@ -34,7 +50,7 @@ function ProductCard({ product, width }) {
         <View style={styles.tileTop}>
           {verified ? (
             <View style={styles.chip}>
-              <Ionicons name="shield-checkmark" size={11} color={colors.live} />
+              <Ionicons name="shield-checkmark" size={11} color={SOBRE_FOTO.live} />
               <Text style={styles.chipText}>Verificado</Text>
             </View>
           ) : (
@@ -42,11 +58,11 @@ function ProductCard({ product, width }) {
           )}
           {outOfStock ? (
             <View style={styles.chip}>
-              <Text style={[styles.chipText, { color: colors.danger }]}>Agotado</Text>
+              <Text style={[styles.chipText, { color: SOBRE_FOTO.danger }]}>Agotado</Text>
             </View>
           ) : lowStock ? (
             <View style={styles.chip}>
-              <Text style={[styles.chipText, { color: colors.warning }]}>Últimas {product.stock}</Text>
+              <Text style={[styles.chipText, { color: SOBRE_FOTO.warning }]}>Últimas {product.stock}</Text>
             </View>
           ) : null}
         </View>
@@ -70,10 +86,11 @@ function ProductCard({ product, width }) {
         </View>
       </View>
     </Pressable>
+    </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: {
     borderRadius: 18,
     borderWidth: 1,
@@ -118,6 +135,6 @@ const styles = StyleSheet.create({
   price: { color: colors.foreground, fontSize: 16, fontWeight: '700', letterSpacing: -0.3 },
   rating: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   ratingText: { color: colors.muted, fontSize: 11, fontFamily: 'monospace' },
-});
+}));
 
 export default memo(ProductCard);

@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { apiFetch, resolveImage } from '../src/lib/api';
 import { useAuth } from '../src/lib/auth-context';
-import { colors } from '../src/theme/colors';
+import { makeStyles, useTheme } from '../src/theme';
 
 const DROP_STATUS = {
   scheduled: { label: 'Próximamente', tone: 'accent' },
@@ -35,6 +35,8 @@ function cuenta(launchAt) {
 }
 
 export default function Drops() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const { user, pushState } = useAuth();
   const [drops, setDrops] = useState([]);
@@ -199,7 +201,7 @@ export default function Drops() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40, gap: 16 },
   center: {
@@ -261,4 +263,4 @@ const styles = StyleSheet.create({
     borderColor: colors.borderStrong,
   },
   buttonGhostText: { color: colors.foreground, fontSize: 14.5, fontWeight: '600' },
-});
+}));

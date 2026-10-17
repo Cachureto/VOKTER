@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { makeStyles, useTheme } from '../theme';
 
 export function Field({ label, error, style, ...props }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={style}>
       <Text style={styles.label}>{label}</Text>
@@ -18,6 +20,8 @@ export function Field({ label, error, style, ...props }) {
 }
 
 export function PasswordField({ label, error, style, ...props }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
   return (
     <View style={style}>
@@ -40,22 +44,24 @@ export function PasswordField({ label, error, style, ...props }) {
   );
 }
 
-const base = {
-  height: 48,
-  borderRadius: 14,
-  borderWidth: 1,
-  borderColor: colors.border,
-  backgroundColor: colors.surface,
-  paddingHorizontal: 15,
-  color: colors.foreground,
-  fontSize: 15,
-};
+const useStyles = makeStyles((colors) => {
+  const base = {
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 15,
+    color: colors.foreground,
+    fontSize: 15,
+  };
 
-const styles = StyleSheet.create({
-  label: { color: colors.muted, fontSize: 13, fontWeight: '500', marginBottom: 7 },
-  input: base,
-  inputWrap: { ...base, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  inputFlex: { flex: 1, color: colors.foreground, fontSize: 15, padding: 0 },
-  inputError: { borderColor: colors.danger },
-  error: { color: colors.danger, fontSize: 12.5, marginTop: 6 },
+  return {
+    label: { color: colors.muted, fontSize: 13, fontWeight: '500', marginBottom: 7 },
+    input: base,
+    inputWrap: { ...base, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    inputFlex: { flex: 1, color: colors.foreground, fontSize: 15, padding: 0 },
+    inputError: { borderColor: colors.danger },
+    error: { color: colors.danger, fontSize: 12.5, marginTop: 6 },
+  };
 });

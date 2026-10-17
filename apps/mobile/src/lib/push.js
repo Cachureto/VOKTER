@@ -56,7 +56,7 @@ function loadNotifications() {
             name: 'Drops',
             importance: cache.AndroidImportance.HIGH,
             vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#00aeef',
+            lightColor: '#00a2e8',
           })
           .catch(() => {});
       }

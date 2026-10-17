@@ -14,9 +14,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { apiFetch } from '../src/lib/api';
 import { extractCode, RESULTS, validateCode } from '../src/lib/authenticity';
-import { colors } from '../src/theme/colors';
+import { makeStyles, useTheme } from '../src/theme';
 
 export default function Escaner() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [manual, setManual] = useState('');
@@ -97,7 +99,7 @@ export default function Escaner() {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.resultContent}>
         {error ? (
-          <View style={[styles.resultCard, { borderColor: 'rgba(255,107,107,0.3)' }]}>
+          <View style={[styles.resultCard, { borderColor: colors.dangerLine }]}>
             <Ionicons name="cloud-offline-outline" size={30} color={colors.danger} />
             <Text style={styles.resultTitle}>No se pudo verificar</Text>
             <Text style={styles.resultText}>{error}</Text>
@@ -155,6 +157,8 @@ export default function Escaner() {
 }
 
 function ManualEntry({ value, onChange, onSubmit, checking }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.manual}>
       <TextInput
@@ -187,6 +191,8 @@ function ManualEntry({ value, onChange, onSubmit, checking }) {
 }
 
 function ResultCard({ data, onReset, router }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const info = RESULTS[data.result] ?? RESULTS.suspicious;
   const tone = colors[info.tone];
 
@@ -221,7 +227,7 @@ function ResultCard({ data, onReset, router }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   center: {
     flex: 1,
@@ -267,9 +273,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: 'rgba(9,9,11,0.7)',
+    backgroundColor: 'rgba(5,5,7,0.72)',
   },
-  checkingText: { color: colors.foreground, fontSize: 14, fontWeight: '600' },
+  checkingText: { color: '#ffffff', fontSize: 14, fontWeight: '600' },
   bottom: { paddingHorizontal: 20, paddingTop: 26, paddingBottom: 40, gap: 18 },
   hint: { color: colors.muted, fontSize: 14, lineHeight: 20, textAlign: 'center' },
   manual: { flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%', marginTop: 4 },
@@ -337,4 +343,4 @@ const styles = StyleSheet.create({
   },
   buttonGhostText: { color: colors.foreground, fontSize: 14.5, fontWeight: '600' },
   link: { color: colors.accent, fontSize: 14, fontWeight: '600', marginTop: 4 },
-});
+}));

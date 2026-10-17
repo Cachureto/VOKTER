@@ -3,9 +3,11 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/lib/auth-context';
-import { colors } from '../src/theme/colors';
+import { makeStyles, useTheme } from '../src/theme';
 
 export default function Cuenta() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const { user, ready, isAdmin, logout } = useAuth();
   const [leaving, setLeaving] = useState(false);
@@ -103,7 +105,7 @@ export default function Cuenta() {
           style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}
         >
           <Ionicons name="settings-outline" size={18} color={colors.subtle} />
-          <Text style={styles.rowText}>Conexión con el servidor</Text>
+          <Text style={styles.rowText}>Apariencia y conexión</Text>
           <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
         </Pressable>
       </View>
@@ -126,7 +128,7 @@ export default function Cuenta() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40, alignItems: 'center' },
@@ -167,8 +169,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(0,174,239,0.3)',
-    backgroundColor: 'rgba(0,174,239,0.1)',
+    borderColor: colors.accentLine,
+    backgroundColor: colors.accentSoft,
     paddingHorizontal: 11,
     paddingVertical: 5,
   },
@@ -223,7 +225,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(255,107,107,0.3)',
+    borderColor: colors.dangerLine,
   },
   logoutText: { color: colors.danger, fontSize: 15, fontWeight: '600' },
-});
+}));

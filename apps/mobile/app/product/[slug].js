@@ -14,9 +14,11 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { apiFetch, resolveImage } from '../../src/lib/api';
 import { useCart } from '../../src/lib/cart-context';
 import { formatCOP } from '../../src/lib/format';
-import { colors } from '../../src/theme/colors';
+import { makeStyles, useTheme } from '../../src/theme';
 
 export default function ProductDetail() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const { slug } = useLocalSearchParams();
   const router = useRouter();
   const { add, count } = useCart();
@@ -210,7 +212,7 @@ export default function ProductDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   center: {
     flex: 1,
@@ -244,7 +246,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(0,0,0,0.25)' },
-  dotActive: { backgroundColor: colors.accentForeground, width: 18 },
+  dotActive: { backgroundColor: colors.accent, width: 18 },
   body: { paddingHorizontal: 20, paddingTop: 24, gap: 6 },
   eyebrow: {
     color: colors.subtle,
@@ -270,8 +272,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
     paddingVertical: 6,
   },
-  badgeLive: { borderColor: 'rgba(62,224,137,0.3)', backgroundColor: 'rgba(62,224,137,0.1)' },
-  badgeDanger: { borderColor: 'rgba(255,107,107,0.3)', backgroundColor: 'rgba(255,107,107,0.1)' },
+  badgeLive: { borderColor: colors.liveLine, backgroundColor: colors.liveSoft },
+  badgeDanger: { borderColor: colors.dangerLine, backgroundColor: colors.dangerSoft },
   badgeText: { color: colors.muted, fontSize: 12, fontWeight: '600' },
   addButton: {
     flexDirection: 'row',
@@ -324,4 +326,4 @@ const styles = StyleSheet.create({
     borderColor: colors.borderStrong,
   },
   authButtonText: { color: colors.foreground, fontSize: 14.5, fontWeight: '600' },
-});
+}));

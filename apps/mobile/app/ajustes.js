@@ -10,14 +10,23 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { apiFetch, detectApiUrl, detectWebUrl, getApiUrl, setApiUrl } from '../src/lib/api';
-import { colors } from '../src/theme/colors';
+import { makeStyles, useTheme } from '../src/theme';
 
 const STORAGE_KEY = 'vokter.apiUrl';
 
+const MODOS = [
+  { value: 'system', label: 'Sistema', icon: 'phone-portrait-outline' },
+  { value: 'light', label: 'Claro', icon: 'sunny-outline' },
+  { value: 'dark', label: 'Oscuro', icon: 'moon-outline' },
+];
+
 // Diagnóstico de conexión: aquí se ve y se corrige la URL del backend.
 export default function Ajustes() {
+  const styles = useStyles();
+  const { colors, preference, setPreference } = useTheme();
   const [url, setUrl] = useState(detectApiUrl());
   const [editing, setEditing] = useState(false);
   const [state, setState] = useState({ status: 'loading' });
@@ -80,7 +89,36 @@ export default function Ajustes() {
       style={styles.screen}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Conexión</Text>
+        <Text style={styles.title}>Apariencia</Text>
+        <Text style={styles.subtitle}>
+          «Sistema» sigue el modo claro u oscuro del teléfono. El botón de sol/luna del inicio
+          cambia entre los dos al instante.
+        </Text>
+        <View style={styles.segment}>
+          {MODOS.map((m) => {
+            const activo = preference === m.value;
+            return (
+              <Pressable
+                key={m.value}
+                onPress={() => setPreference(m.value)}
+                style={[styles.segmentItem, activo && styles.segmentItemActive]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: activo }}
+              >
+                <Ionicons
+                  name={m.icon}
+                  size={16}
+                  color={activo ? colors.contrastForeground : colors.muted}
+                />
+                <Text style={[styles.segmentText, activo && styles.segmentTextActive]}>
+                  {m.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Text style={[styles.title, { marginTop: 36 }]}>Conexión</Text>
         <Text style={styles.subtitle}>
           La app detecta sola la IP del PC donde corre Expo. Cámbiala solo si el backend está en
           otra máquina o en otro puerto.
@@ -157,11 +195,33 @@ export default function Ajustes() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40 },
   title: { color: colors.foreground, fontSize: 28, fontWeight: '800', letterSpacing: -0.8 },
   subtitle: { color: colors.muted, fontSize: 14, marginTop: 8, lineHeight: 20 },
+  segment: {
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: 18,
+    padding: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  segmentItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    height: 40,
+    borderRadius: 999,
+  },
+  segmentItemActive: { backgroundColor: colors.contrast },
+  segmentText: { color: colors.muted, fontSize: 13.5, fontWeight: '600' },
+  segmentTextActive: { color: colors.contrastForeground },
   card: {
     marginTop: 24,
     padding: 20,
@@ -207,8 +267,8 @@ const styles = StyleSheet.create({
   },
   smallButtonGhostText: { color: colors.foreground, fontSize: 14, fontWeight: '600' },
   alert: { marginTop: 20, padding: 14, borderRadius: 14, borderWidth: 1 },
-  alertOk: { borderColor: 'rgba(62,224,137,0.3)', backgroundColor: 'rgba(62,224,137,0.1)' },
-  alertError: { borderColor: 'rgba(255,107,107,0.3)', backgroundColor: 'rgba(255,107,107,0.1)' },
+  alertOk: { borderColor: colors.liveLine, backgroundColor: colors.liveSoft },
+  alertError: { borderColor: colors.dangerLine, backgroundColor: colors.dangerSoft },
   alertTitle: { fontSize: 15, fontWeight: '700' },
   alertText: { color: colors.muted, fontSize: 14, marginTop: 4, lineHeight: 20 },
   hint: { color: colors.subtle, fontSize: 12, marginTop: 10, lineHeight: 18 },
@@ -221,4 +281,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: { color: colors.accentForeground, fontSize: 15, fontWeight: '700' },
-});
+}));

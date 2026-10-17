@@ -17,9 +17,11 @@ import { apiFetch, resolveImage } from '../src/lib/api';
 import { useAuth } from '../src/lib/auth-context';
 import { useCart } from '../src/lib/cart-context';
 import { formatCOP } from '../src/lib/format';
-import { colors } from '../src/theme/colors';
+import { makeStyles, useTheme } from '../src/theme';
 
 export default function Carrito() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const { user } = useAuth();
   const { items, count, subtotalCents, setQuantity, remove, clear } = useCart();
@@ -95,7 +97,7 @@ export default function Carrito() {
         <Pressable onPress={() => router.replace('/pedidos')} style={styles.button}>
           <Text style={styles.buttonText}>Ver mis pedidos</Text>
         </Pressable>
-        <Pressable onPress={() => router.replace('/')} style={styles.buttonGhost}>
+        <Pressable onPress={() => router.replace('/catalogo')} style={styles.buttonGhost}>
           <Text style={styles.buttonGhostText}>Seguir viendo el catálogo</Text>
         </Pressable>
       </ScrollView>
@@ -109,7 +111,7 @@ export default function Carrito() {
         <Ionicons name="bag-outline" size={32} color={colors.subtle} />
         <Text style={styles.emptyTitle}>Tu carrito está vacío</Text>
         <Text style={styles.emptyText}>Agrega productos desde el catálogo.</Text>
-        <Pressable onPress={() => router.replace('/')} style={styles.button}>
+        <Pressable onPress={() => router.replace('/catalogo')} style={styles.button}>
           <Text style={styles.buttonText}>Ir al catálogo</Text>
         </Pressable>
       </View>
@@ -260,7 +262,7 @@ export default function Carrito() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40 },
   center: {
@@ -331,8 +333,8 @@ const styles = StyleSheet.create({
     padding: 13,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: 'rgba(255,107,107,0.3)',
-    backgroundColor: 'rgba(255,107,107,0.1)',
+    borderColor: colors.dangerLine,
+    backgroundColor: colors.dangerSoft,
   },
   alertText: { flex: 1, color: colors.danger, fontSize: 13.5, lineHeight: 19 },
   button: {
@@ -375,4 +377,4 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-});
+}));
