@@ -23,7 +23,10 @@ export function VokterMark({ className = 'h-8 w-auto' }) {
       aria-hidden="true"
       width={640}
       height={346}
-      className={className}
+      // `object-contain` es un seguro: si alguien le da una caja cuadrada, la
+      // marca se centra dentro en vez de aplastarse. Aun así conviene pasar
+      // solo el alto (`h-8 w-auto`), que es como está pensada.
+      className={`object-contain ${className}`}
       style={{ filter: 'drop-shadow(0 0 10px rgba(0, 162, 232, 0.35))' }}
     />
   );

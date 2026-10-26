@@ -14,10 +14,30 @@ const SUGGESTIONS = [
   { icon: Smartphone, text: 'Accesorios para el celular en la moto' },
 ];
 
+/**
+ * Avatar del asistente.
+ *
+ * El emblema es apaisado (640×346), así que se le fija solo el alto y el ancho
+ * sale solo; antes se le daba una caja cuadrada y salía aplastado. La placa
+ * ocupa 2rem de lado para que la cuadrícula de productos, que se alinea con
+ * `sm:pl-11`, siga cuadrando con el texto de la respuesta. `mark-plate` le
+ * pone fondo oscuro en modo claro, igual que en la barra superior, porque el
+ * resplandor del logo se compuso sobre negro.
+ */
+function MarcaAsistente({ className = '' }) {
+  return (
+    // `px-0.5 py-0` anula el relleno de `.mark-plate`: con el suyo, la marca
+    // no cabía a lo ancho en los 2rem y el flex la encogía.
+    <span className={`mark-plate h-8 w-8 shrink-0 rounded-xl border border-border px-0.5 py-0 ${className}`}>
+      <VokterMark className="h-3.5 w-auto shrink-0" />
+    </span>
+  );
+}
+
 function TypingIndicator() {
   return (
     <div className="flex items-center gap-3">
-      <VokterMark className="h-8 w-8 shrink-0" />
+      <MarcaAsistente />
       <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-border bg-surface px-4 py-3.5">
         {[0, 150, 300].map((delay) => (
           <span
@@ -86,7 +106,9 @@ function SearchChat() {
     <div className="container-page flex min-h-[calc(100vh-6.25rem)] max-w-4xl flex-col py-8">
       <div className="flex items-center justify-between gap-4 border-b border-border pb-6">
         <div className="flex items-center gap-3">
-          <VokterMark className="h-10 w-10" />
+          <span className="mark-plate shrink-0">
+            <VokterMark className="h-7 w-auto" />
+          </span>
           <div>
             <h1 className="font-display text-lg font-semibold tracking-tight">Asistente de compras Vokter</h1>
             <p className="flex items-center gap-1.5 text-xs text-muted">
@@ -136,7 +158,7 @@ function SearchChat() {
               ) : (
                 <div key={i} className="flex animate-fade-up flex-col gap-4">
                   <div className="flex items-start gap-3">
-                    <VokterMark className="h-8 w-8 shrink-0" />
+                    <MarcaAsistente className="mt-0.5" />
                     <div
                       className={`max-w-[85%] rounded-2xl rounded-tl-md border px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
                         m.error ? 'border-danger/30 bg-danger/10 text-danger' : 'border-border bg-surface'
