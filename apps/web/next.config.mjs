@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { normalizarOrigen } from './lib/origen-api.mjs';
 
 /**
  * En producción la web y la API son dos proyectos de Vercel con dominios
@@ -10,30 +11,6 @@ import { fileURLToPath } from 'node:url';
  * reenvía /api/* al backend por detrás. Todo queda same-site, sin CORS y con
  * una sola URL pública.
  */
-
-/**
- * Deja el origen de la API en la forma que Next acepta como destino de un
- * rewrite: una URL absoluta con protocolo y sin barra final.
- *
- * Se normaliza en vez de exigir el formato exacto porque el valor se escribe a
- * mano en el panel de Vercel, y los dos errores típicos —pegar el host pelado
- * y dejar la barra del final— fallan de formas poco obvias: sin protocolo Next
- * revienta al cargar la configuración, y con barra el destino queda con una
- * doble barra.
- */
-function normalizarOrigen(valor) {
-  const limpio = String(valor).trim().replace(/\/+$/, '');
-  const conProtocolo = /^https?:\/\//i.test(limpio) ? limpio : `https://${limpio}`;
-  try {
-    // Valida de verdad: `new URL` rechaza espacios, rutas mal formadas, etc.
-    return new URL(conProtocolo).origin;
-  } catch {
-    throw new Error(
-      `API_ORIGIN no es una URL válida: ${JSON.stringify(valor)}. ` +
-        'Debe ser el dominio de la API, por ejemplo https://mi-api.vercel.app',
-    );
-  }
-}
 
 // Los rewrites se resuelven al construir, no en cada petición: lo que quede
 // aquí se congela en el build. Si la variable falta en Vercel, el fallback a
@@ -55,6 +32,15 @@ if (process.env.NODE_ENV === 'production' && !crudo) {
 }
 
 const API_ORIGIN = normalizarOrigen(crudo ?? 'http://localhost:4000');
+
+// La normalización vive en lib/origen-api.mjs y la usan también el cliente y
+// /diagnostico, para que los tres entiendan el valor igual.
+if (!API_ORIGIN) {
+  throw new Error(
+    `API_ORIGIN no es una URL válida: ${JSON.stringify(crudo)}. Debe ser solo el ` +
+      'dominio de la API (ej. https://mi-api.vercel.app), sin ninguna ruta detrás.',
+  );
+}
 
 // Queda en el log del build: si la web no encuentra la API, lo primero que se
 // quiere ver es contra qué origen se construyó.

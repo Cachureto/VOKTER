@@ -1,3 +1,5 @@
+import { normalizarOrigen } from './origen-api.mjs';
+
 // Desde dónde se llama a la API:
 //
 // - En el navegador, contra el mismo dominio (cadena vacía = ruta relativa).
@@ -11,11 +13,15 @@
 // `API_ORIGIN_COMPILADO` lo incrusta next.config.mjs al construir. Es el
 // último recurso antes de localhost, para cuando el hosting no pasa variables
 // al proceso en ejecución.
+//
+// Se normaliza igual que en next.config.mjs. Antes no se hacía, y como el
+// rewrite sí normalizaba, una variable con una ruta pegada (por ejemplo la URL
+// de /api/health) hacía que el navegador funcionara y el servidor no: pedía
+// /api/health/api/products y recibía 404.
 const SERVER_ORIGIN =
-  process.env.API_ORIGIN ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  process.env.API_ORIGIN_COMPILADO ??
-  'http://localhost:4000';
+  normalizarOrigen(
+    process.env.API_ORIGIN ?? process.env.NEXT_PUBLIC_API_URL ?? process.env.API_ORIGIN_COMPILADO,
+  ) ?? 'http://localhost:4000';
 const BROWSER_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 export const API_URL = typeof window === 'undefined' ? SERVER_ORIGIN : BROWSER_ORIGIN;

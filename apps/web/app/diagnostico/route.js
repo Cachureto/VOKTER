@@ -10,13 +10,13 @@
  * Es información de infraestructura, no datos de nadie: el origen de la API es
  * público y aquí no se toca la base ni la sesión.
  */
+import { normalizarOrigen } from '@/lib/origen-api.mjs';
+
 export const dynamic = 'force-dynamic';
 
-const ORIGEN =
-  process.env.API_ORIGIN ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  process.env.API_ORIGIN_COMPILADO ??
-  'http://localhost:4000';
+const CRUDO =
+  process.env.API_ORIGIN ?? process.env.NEXT_PUBLIC_API_URL ?? process.env.API_ORIGIN_COMPILADO;
+const ORIGEN = normalizarOrigen(CRUDO) ?? 'http://localhost:4000';
 
 // De dónde salió el valor, que es justo lo que se discute al desplegar.
 const FUENTE = process.env.API_ORIGIN
@@ -57,6 +57,7 @@ export async function GET() {
       {
         alcanzaLaApi: false,
         origen: ORIGEN,
+        valorDeLaVariable: CRUDO ?? '(ninguna)',
         fuenteDelOrigen: FUENTE,
         urlProbada: url,
         codigo,
@@ -84,6 +85,7 @@ export async function GET() {
     {
       alcanzaLaApi: respuesta.ok,
       origen: ORIGEN,
+      valorDeLaVariable: CRUDO ?? '(ninguna)',
       fuenteDelOrigen: FUENTE,
       urlProbada: url,
       estado: respuesta.status,
