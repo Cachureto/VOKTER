@@ -74,6 +74,14 @@ const nextConfig = {
   // dependencias viven en el node_modules de la raíz, no dentro de apps/web,
   // y sin esto el servidor sale sin ellas y revienta al arrancar.
   outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..'),
+  // El mismo origen con el que se construyeron los rewrites, incrustado en el
+  // código. Así el servidor sabe a dónde llamar aunque el hosting solo pase
+  // las variables al compilar y no al ejecutar, que es lo normal fuera de
+  // Vercel: sin esto se caía al valor por defecto (localhost:4000), la
+  // llamada moría y la página salía con "Algo salió mal".
+  // Una variable de entorno en ejecución sigue teniendo prioridad.
+  env: { API_ORIGIN_COMPILADO: API_ORIGIN },
+
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${API_ORIGIN}/api/:path*` }];
   },

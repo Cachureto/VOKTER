@@ -8,8 +8,14 @@
 //
 // En local basta con NEXT_PUBLIC_API_URL=http://localhost:4000 y todo sigue
 // yendo directo, igual que antes.
+// `API_ORIGIN_COMPILADO` lo incrusta next.config.mjs al construir. Es el
+// último recurso antes de localhost, para cuando el hosting no pasa variables
+// al proceso en ejecución.
 const SERVER_ORIGIN =
-  process.env.API_ORIGIN ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+  process.env.API_ORIGIN ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.API_ORIGIN_COMPILADO ??
+  'http://localhost:4000';
 const BROWSER_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 export const API_URL = typeof window === 'undefined' ? SERVER_ORIGIN : BROWSER_ORIGIN;
