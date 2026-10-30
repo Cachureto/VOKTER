@@ -38,10 +38,16 @@ function normalizarOrigen(valor) {
 // 404 y las páginas revientan al renderizar, sin ninguna pista de por qué. Es
 // mejor que el build falle aquí y se vea el motivo.
 const crudo = process.env.API_ORIGIN ?? process.env.NEXT_PUBLIC_API_URL;
-if (process.env.VERCEL && !crudo) {
+
+// `next build` corre con NODE_ENV=production, así que esto salta en cualquier
+// hosting (Vercel, Hostinger, Docker…), no solo en Vercel. Antes el aviso era
+// solo para Vercel y en los demás se horneaba localhost:4000 en silencio: la
+// web se desplegaba "bien" y luego todo /api/* daba 404 sin ninguna pista.
+// Para construir en tu máquina sin definirla: API_ORIGIN=http://localhost:4000 npm run build
+if (process.env.NODE_ENV === 'production' && !crudo) {
   throw new Error(
-    'Falta API_ORIGIN. Defínela en las variables de entorno del proyecto ' +
-      '(marcada para Production) con el dominio de la API, sin barra final.',
+    'Falta API_ORIGIN. Defínela en las variables de entorno del despliegue ' +
+      'con el dominio de la API, sin barra final (ej. https://mi-api.hostingersite.com).',
   );
 }
 
