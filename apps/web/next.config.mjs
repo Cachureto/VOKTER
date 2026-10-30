@@ -1,3 +1,6 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 /**
  * En producción la web y la API son dos proyectos de Vercel con dominios
  * distintos. Para el navegador eso rompería el login: la cookie httpOnly del
@@ -60,6 +63,17 @@ console.log(`[next.config] /api/* se reenvía a ${API_ORIGIN}`);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   agentRules: false,
+
+  // `standalone` deja en .next/standalone un servidor con solo las
+  // dependencias que la web usa de verdad, que es lo que espera un hosting
+  // de Node. Sin esto Next solo deja los archivos de la compilación y el
+  // panel se queja de que no hay servidor que arrancar.
+  output: 'standalone',
+
+  // En un monorepo hay que decirle dónde empieza el proyecto: las
+  // dependencias viven en el node_modules de la raíz, no dentro de apps/web,
+  // y sin esto el servidor sale sin ellas y revienta al arrancar.
+  outputFileTracingRoot: path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..'),
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${API_ORIGIN}/api/:path*` }];
   },
