@@ -113,7 +113,7 @@ export default async function DropsPage() {
             Drops limitados. <span className="text-accent">Cupos contados.</span>
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted">
-            Únete a la lista de espera de cada lanzamiento y te avisamos en la app cuando abra. Todos los productos
+            Únete a la lista de espera de cada lanzamiento y sé de los primeros cuando abra. Todos los productos
             vienen con su código de autenticidad.
           </p>
         </div>
@@ -124,9 +124,9 @@ export default async function DropsPage() {
           <div className="card flex flex-col items-center gap-3 px-6 py-20 text-center">
             <CalendarClock size={28} className="text-muted" />
             <p className="font-display text-lg font-semibold">No hay drops programados por ahora</p>
-            <p className="text-sm text-muted">Descarga la app para recibir la alerta del próximo lanzamiento.</p>
-            <Link href="/download" className="btn-primary mt-3">
-              Descargar la app
+            <p className="text-sm text-muted">Vuelve pronto: aquí verás el próximo lanzamiento y podrás unirte a la lista de espera.</p>
+            <Link href="/catalog" className="btn-primary mt-3">
+              Ver el catálogo
             </Link>
           </div>
         )}

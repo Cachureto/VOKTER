@@ -7,7 +7,7 @@ const POINTS = [
     text: 'Valida el código de autenticidad de todo lo que compras.',
   },
   { icon: Bell, title: 'Acceso a drops', text: 'Únete a listas de espera y recibe alertas de lanzamientos.' },
-  { icon: Sparkles, title: 'Una cuenta, web y app', text: 'El mismo login para la tienda y la app móvil.' },
+  { icon: Sparkles, title: 'Asistente con IA', text: 'Encuentra productos describiendo lo que necesitas.' },
 ];
 
 export default function AuthShell({ eyebrow, title, description, children, footer }) {

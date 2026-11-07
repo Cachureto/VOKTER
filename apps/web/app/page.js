@@ -4,12 +4,12 @@ import {
   BadgeCheck,
   Bell,
   CalendarClock,
-  QrCode,
-  ScanLine,
   ShieldCheck,
-  Smartphone,
   Sparkles,
+  Ticket,
+  Trophy,
   Truck,
+  Wallet,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { categoryIcon } from '@/lib/categories';
@@ -276,7 +276,7 @@ export default async function HomePage() {
             <span className="font-mono text-xs text-subtle">01</span>
             <h3 className="display mt-4 text-xl">Autenticidad verificada</h3>
             <p className="mt-2 text-sm leading-relaxed text-muted">
-              Cada producto trae un código único. Valídalo en su ficha o escanéalo con la app para confirmar que es
+              Cada producto trae un código único. Valídalo en su ficha o en el validador para confirmar que es
               original y está activo.
             </p>
             <div className="mt-auto pt-8">
@@ -447,60 +447,94 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ================= APP MÓVIL ================= */}
+      {/* ================= APP FANÁTICOS 360 ================= */}
       <section className="container-page pt-20 lg:pt-28">
-        <div className="grid items-center gap-10 overflow-hidden rounded-3xl border border-border bg-surface p-6 sm:p-10 lg:grid-cols-2 lg:p-14">
+        <div className="grid items-center gap-10 overflow-hidden rounded-3xl border border-[#232a33] bg-[#0b0f15] p-6 text-white sm:p-10 lg:grid-cols-2 lg:p-14">
           <div>
-            <p className="eyebrow">App Vokter para Android</p>
-            <h2 className="display mt-4 text-3xl sm:text-4xl">Verifica en la calle, no solo en la web.</h2>
+            <p className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-[#e9b931]">
+              Nueva app · Fanáticos 360
+              <span className="rounded border-2 border-red-500 px-1 font-sans text-[10px] font-black tracking-normal text-red-500">18+</span>
+            </p>
+            <h2 className="display mt-4 text-3xl sm:text-4xl">
+              Tu pasión, <span className="text-[#e9b931]">tu apuesta.</span>
+            </h2>
+            <p className="mt-4 max-w-md text-[#9aa1ab]">
+              Apuestas deportivas de la Liga BetPlay, la Copa BetPlay y el fútbol internacional, desde tu Android.
+            </p>
             <ul className="mt-8 flex flex-col gap-4">
               {[
-                [ScanLine, 'Escanea el QR del producto y valida su autenticidad al instante'],
-                [Bell, 'Recibe una notificación cuando se anuncie un nuevo drop'],
-                [Smartphone, 'Tu misma cuenta, pedidos y reseñas que en la web'],
+                [Trophy, 'Partidos en vivo con cuotas que se actualizan solas'],
+                [Ticket, 'Apuestas simples y combinadas en seis mercados'],
+                [Wallet, 'Billetera en pesos con PSE, tarjeta o Nequi'],
+                [ShieldCheck, 'Límites de depósito y pausa de la cuenta cuando quieras'],
               ].map(([Icon, text]) => (
-                <li key={text} className="flex items-start gap-3 text-sm text-muted">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                <li key={text} className="flex items-start gap-3 text-sm text-[#c9ced6]">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#e9b931]/15 text-[#e9b931]">
                     <Icon size={15} />
                   </span>
                   {text}
                 </li>
               ))}
             </ul>
-            <Link href="/download" className="btn-primary mt-10">
-              Descargar la app <ArrowRight size={17} />
+            <Link
+              href="/download"
+              className="mt-10 inline-flex h-12 items-center gap-2 rounded-2xl bg-[#e9b931] px-6 text-[15px] font-extrabold text-[#1a1405] transition hover:brightness-105"
+            >
+              Descargar Fanáticos 360 <ArrowRight size={17} />
             </Link>
           </div>
 
-          {/* Mockup de teléfono */}
+          {/* Mockup del teléfono con una tarjeta de partido de la app */}
           <div className="relative mx-auto">
-            <div className="glow-accent pointer-events-none absolute inset-0 scale-150" />
-            <div className="relative w-64 rounded-[2.5rem] border-[6px] border-surface-hover bg-background p-3 shadow-2xl shadow-black">
-              <div className="mx-auto mb-4 h-5 w-24 rounded-full bg-surface-hover" />
-              <p className="text-center font-mono text-[10px] uppercase tracking-[0.2em] text-subtle">
-                Escanear código
+            <div
+              className="pointer-events-none absolute inset-0 scale-150 rounded-full opacity-30 blur-3xl"
+              style={{ background: 'radial-gradient(closest-side, #e9b93177, transparent)' }}
+            />
+            <div className="relative w-64 rounded-[2.5rem] border-[6px] border-[#1b2129] bg-[#0b0f15] p-3 shadow-2xl shadow-black">
+              <div className="mx-auto mb-4 h-5 w-24 rounded-full bg-[#1b2129]" />
+              <p className="px-1 text-[13px] font-black tracking-[0.18em]">
+                FANATICOS <span className="text-[#f5a20f]">360</span>
               </p>
-              <div className="relative mx-auto mt-4 flex aspect-square w-44 items-center justify-center rounded-2xl border border-border bg-surface">
-                <QrCode size={96} strokeWidth={1.2} className="text-foreground/80" />
-                <span className="absolute inset-x-4 top-1/2 h-0.5 bg-accent shadow-[0_0_16px_2px_rgba(0,174,239,0.7)]" />
-                {[
-                  'top-2 left-2 border-t-2 border-l-2',
-                  'top-2 right-2 border-t-2 border-r-2',
-                  'bottom-2 left-2 border-b-2 border-l-2',
-                  'right-2 bottom-2 border-r-2 border-b-2',
-                ].map((pos) => (
-                  <span key={pos} className={`absolute h-6 w-6 rounded-sm border-accent ${pos}`} />
-                ))}
+              <div className="mt-3 rounded-2xl border border-[#232a33] bg-[#141920] p-3">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-md bg-[#e9b931]/15 px-2 py-0.5 text-[10px] font-bold text-[#e9b931]">Liga BetPlay</span>
+                  <span className="text-[10px] text-[#9aa1ab]">Hoy 20:00</span>
+                </div>
+                <div className="mt-3 flex items-center justify-between px-1">
+                  {['Nacional', 'Millonarios'].map((t, i) => (
+                    <div key={t} className={`flex flex-col items-center gap-1 ${i ? 'order-3' : ''}`}>
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1b2129] text-sm font-black text-[#e9b931]">
+                        {t[0]}
+                      </span>
+                      <span className="text-[10px] font-bold">{t}</span>
+                    </div>
+                  ))}
+                  <span className="order-2 rounded-lg bg-[#1b2129] px-2.5 py-1 text-[11px] font-black text-[#e9b931]">VS</span>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-1.5">
+                  {[
+                    ['1', '2.05'],
+                    ['X', '3.30'],
+                    ['2', '3.60'],
+                  ].map(([k, v], i) => (
+                    <div
+                      key={k}
+                      className={`rounded-lg py-1.5 text-center ${i === 0 ? 'bg-[#e9b931] text-[#1a1405]' : 'bg-[#1b2129]'}`}
+                    >
+                      <p className={`text-[9px] ${i === 0 ? '' : 'text-[#9aa1ab]'}`}>{k}</p>
+                      <p className={`text-[13px] font-black ${i === 0 ? '' : 'text-[#e9b931]'}`}>{v}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="mt-5 rounded-2xl border border-live/30 bg-live/10 p-3">
-                <p className="flex items-center gap-2 text-xs font-semibold text-live">
-                  <BadgeCheck size={16} /> Producto original
-                </p>
-                <p className="mt-1 truncate font-mono text-[10px] text-muted">
-                  {products[0]?.authenticityCode ?? 'VKT-XXXXXXXX'}
-                </p>
+              <div className="mt-3 flex items-center gap-2 rounded-2xl bg-[#e9b931] p-2.5 text-[#1a1405]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1a1405] text-xs font-black text-[#e9b931]">1</span>
+                <div className="flex-1">
+                  <p className="text-[11px] font-black">Apuesta simple</p>
+                  <p className="text-[9px] font-semibold opacity-75">Cuota 2.05 · Ganas $ 20.500</p>
+                </div>
               </div>
-              <div className="mx-auto mt-4 h-1 w-20 rounded-full bg-surface-hover" />
+              <div className="mx-auto mt-4 h-1 w-20 rounded-full bg-[#1b2129]" />
             </div>
           </div>
         </div>

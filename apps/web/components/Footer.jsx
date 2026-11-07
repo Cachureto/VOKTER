@@ -21,11 +21,11 @@ const COLUMNS = [
     ],
   },
   {
-    title: 'App Vokter',
+    title: 'Fanáticos 360',
     links: [
       { href: '/download', label: 'Descargar para Android' },
-      { href: '/download', label: 'Escáner de autenticidad' },
-      { href: '/download', label: 'Alertas de drops' },
+      { href: '/download#instalar', label: 'Cómo instalar' },
+      { href: '/download#juego-responsable', label: 'Juego responsable (+18)' },
     ],
   },
 ];
@@ -44,7 +44,7 @@ export default function Footer() {
           <Logo />
           <p className="mt-5 text-sm leading-relaxed text-muted">
             Tecnología urbana, accesorios y hogar con origen comprobable. Cada producto de Vokter tiene un código único
-            que puedes validar en la web o con la app.
+            que puedes validar en la web.
           </p>
           <ul className="mt-6 flex flex-col gap-2.5">
             {PILLARS.map(({ icon: Icon, label }) => (

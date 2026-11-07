@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,25 +15,16 @@ import { useRouter } from 'expo-router';
 import { apiFetch, resolveImage } from '../src/lib/api';
 import { useAuth } from '../src/lib/auth-context';
 import { colors } from '../src/theme/colors';
+=======
+import { Redirect } from 'expo-router';
+>>>>>>> Stashed changes
 
-const DROP_STATUS = {
-  scheduled: { label: 'Próximamente', tone: 'accent' },
-  live: { label: 'En vivo', tone: 'live' },
-  sold_out: { label: 'Agotado', tone: 'danger' },
-  ended: { label: 'Finalizado', tone: 'muted' },
-  cancelled: { label: 'Cancelado', tone: 'muted' },
-};
-
-function cuenta(launchAt) {
-  const ms = new Date(launchAt) - Date.now();
-  if (ms <= 0) return null;
-  const dias = Math.floor(ms / 86400000);
-  const horas = Math.floor((ms % 86400000) / 3600000);
-  const min = Math.floor((ms % 3600000) / 60000);
-  if (dias > 0) return `en ${dias} día${dias === 1 ? '' : 's'}`;
-  if (horas > 0) return `en ${horas} h ${min} min`;
-  return `en ${min} min`;
+// Pantalla de la antigua tienda Vokter: ya no existe en Fanáticos 360.
+// Este archivo se puede borrar (git rm); mientras exista, solo lleva al inicio.
+export default function PantallaRetirada() {
+  return <Redirect href="/" />;
 }
+<<<<<<< Updated upstream
 
 export default function Drops() {
   const router = useRouter();
@@ -262,3 +254,5 @@ const styles = StyleSheet.create({
   },
   buttonGhostText: { color: colors.foreground, fontSize: 14.5, fontWeight: '600' },
 });
+=======
+>>>>>>> Stashed changes

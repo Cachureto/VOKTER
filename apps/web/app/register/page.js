@@ -45,7 +45,7 @@ function RegisterForm() {
     <AuthShell
       eyebrow="Únete a Vokter"
       title="Crea tu cuenta"
-      description="Un mismo login para la tienda web y la app móvil."
+      description="Tu cuenta para comprar, seguir tus pedidos y unirte a los drops."
       footer={
         <>
           ¿Ya tienes cuenta?{' '}

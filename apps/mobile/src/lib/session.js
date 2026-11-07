@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
-const ACCESS_KEY = 'vokter.accessToken';
-const REFRESH_KEY = 'vokter.refreshToken';
+const ACCESS_KEY = 'f360.accessToken';
+const REFRESH_KEY = 'f360.refreshToken';
 
 // Copia en memoria para no leer SecureStore en cada petición.
 let tokens = { accessToken: null, refreshToken: null };

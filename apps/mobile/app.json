@@ -1,30 +1,43 @@
 {
   "expo": {
-    "name": "Vokter",
+    "name": "Fanáticos 360",
     "slug": "vokter",
+<<<<<<< Updated upstream
     "scheme": "vokter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#09090b",
+=======
+    "scheme": "fanaticos360",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0b0f15",
+>>>>>>> Stashed changes
     "ios": {
       "supportsTablet": false
     },
     "android": {
+<<<<<<< Updated upstream
       "package": "com.vokter.app",
+=======
+      "package": "com.fanaticos360.app",
+      "versionCode": 1,
+>>>>>>> Stashed changes
       "adaptiveIcon": {
-        "backgroundColor": "#09090b",
+        "backgroundColor": "#0b0f15",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.INTERNET",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.INTERNET"
       ],
       "blockedPermissions": [
+        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
@@ -33,15 +46,6 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Vokter usa la cámara solo para leer el código QR de autenticidad del producto.",
-          "microphonePermission": false,
-          "recordAudioAndroid": false,
-          "barcodeScannerEnabled": true
-        }
-      ],
       [
         "expo-build-properties",
         {
@@ -57,6 +61,9 @@
         "projectId": "36cb665e-2ca7-4f58-a314-288fe6fa2202"
       }
     },
-    "owner": "pipeeex"
+    "owner": "pipeeex",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
   }
 }

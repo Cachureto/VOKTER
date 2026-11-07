@@ -96,9 +96,9 @@ export default function AuthenticityValidator({ defaultCode }) {
               className="shrink-0 rounded-lg bg-white p-1.5"
             />
             <div className="min-w-0">
-              <p className="text-sm font-semibold">Escanéalo con la app de Vokter</p>
+              <p className="text-sm font-semibold">El QR lleva este mismo código</p>
               <p className="mt-1 text-sm text-muted">
-                La app lee el código y lo verifica contra el registro al instante, sin escribir nada.
+                Cualquier lector de QR muestra el código; pégalo aquí para verificarlo contra el registro.
               </p>
               <p className="mt-2 truncate font-mono text-xs text-subtle">{defaultCode}</p>
             </div>

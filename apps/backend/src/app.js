@@ -14,6 +14,7 @@ import authenticityRoutes from './modules/authenticity/authenticity.routes.js';
 import aiRoutes from './modules/ai/ai.routes.js';
 import categoriesRoutes from './modules/categories/categories.routes.js';
 import notificationsRoutes from './modules/notifications/notifications.routes.js';
+import f360Routes from './modules/f360/f360.routes.js';
 
 export const app = express();
 
@@ -43,6 +44,8 @@ app.use('/api/drops', dropsRoutes);
 app.use('/api/authenticity', authenticityRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/categories', categoriesRoutes);
+// Fanáticos 360 (app de apuestas): mismo servidor, cuentas y tablas aparte.
+app.use('/api/f360', f360Routes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

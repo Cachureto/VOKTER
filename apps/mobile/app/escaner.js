@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -338,3 +339,12 @@ const styles = StyleSheet.create({
   buttonGhostText: { color: colors.foreground, fontSize: 14.5, fontWeight: '600' },
   link: { color: colors.accent, fontSize: 14, fontWeight: '600', marginTop: 4 },
 });
+=======
+import { Redirect } from 'expo-router';
+
+// Pantalla de la antigua tienda Vokter: ya no existe en Fanáticos 360.
+// Este archivo se puede borrar (git rm); mientras exista, solo lleva al inicio.
+export default function PantallaRetirada() {
+  return <Redirect href="/" />;
+}
+>>>>>>> Stashed changes

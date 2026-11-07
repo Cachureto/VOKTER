@@ -124,7 +124,7 @@ export default async function ProductPage({ params }) {
           <ul className="mt-6 grid gap-3 sm:grid-cols-3">
             {[
               [BadgeCheck, 'Código de autenticidad único'],
-              [ScanLine, 'Valídalo también con la app'],
+              [ScanLine, 'Valídalo cuando quieras en la web'],
               [Truck, 'Envío a toda Colombia'],
             ].map(([Icon, text]) => (
               <li

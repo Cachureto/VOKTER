@@ -1,8 +1,10 @@
 import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 import { clearTokens, getTokens, saveTokens } from './session';
 
 const DEFAULT_PORT = 4000; // backend Express
-const WEB_PORT = 3000; // Next.js, que es quien sirve las fotos de /public
+// Todas las rutas de Fanáticos 360 cuelgan de aquí en la API.
+const PREFIJO = '/api/f360';
 
 /**
  * Host desde el que Expo está sirviendo el bundle.
@@ -21,12 +23,18 @@ function hostFromExpo() {
 }
 
 function normalize(url) {
-  const clean = String(url ?? '').trim().replace(/\/+$/, '');
+  const clean = String(url ?? '').trim();
   if (!clean) return null;
-  return /^https?:\/\//i.test(clean) ? clean : `http://${clean}`;
+  const conProtocolo = /^https?:\/\//i.test(clean) ? clean : `http://${clean}`;
+  try {
+    // Solo el origen: si alguien pega la URL de /api/f360/estado, se queda con el dominio.
+    return new URL(conProtocolo).origin;
+  } catch {
+    return null;
+  }
 }
 
-/** URL por defecto: .env si existe, si no la IP detectada de Expo. */
+/** URL por defecto: la horneada en el build, si no la IP detectada de Expo. */
 export function detectApiUrl() {
   const fromEnv = normalize(process.env.EXPO_PUBLIC_API_URL);
   if (fromEnv) return fromEnv;
@@ -34,23 +42,9 @@ export function detectApiUrl() {
   return `http://${host ?? 'localhost'}:${DEFAULT_PORT}`;
 }
 
-/**
- * Las fotos del catálogo se guardan como rutas relativas (`/products/x.jpg`) y
- * las sirve la web de Next.js, no la API. Por eso necesitan otro origen.
- */
-export function detectWebUrl() {
-  const fromEnv = normalize(process.env.EXPO_PUBLIC_WEB_URL);
-  if (fromEnv) return fromEnv;
-  // Mismo host que la API (así respeta la IP manual de Ajustes), otro puerto.
-  const host = getApiUrl().replace(/^https?:\/\//i, '').split(':')[0];
-  return `http://${host || 'localhost'}:${WEB_PORT}`;
-}
-
-/** Convierte la ruta que devuelve la API en una URL que el teléfono puede abrir. */
+/** Los escudos llegan como URL completa del proveedor; el resto no tiene imagen. */
 export function resolveImage(url) {
-  if (!url) return null;
-  if (/^https?:\/\//i.test(url)) return url;
-  return `${detectWebUrl()}${url.startsWith('/') ? '' : '/'}${url}`;
+  return url && /^https?:\/\//i.test(url) ? url : null;
 }
 
 // Override en memoria (la pantalla de Ajustes lo puede cambiar para probar otra IP).
@@ -63,6 +57,33 @@ export function getApiUrl() {
   return override ?? detectApiUrl();
 }
 
+// La URL elegida en Ajustes se guarda en el teléfono. Se lee una sola vez al
+// cargar este módulo y toda petición espera esa lectura, así ninguna sale
+// hacia la URL equivocada en el arranque.
+const CLAVE_URL = 'f360.apiUrl';
+const urlCargada = (async () => {
+  try {
+    const guardada = await SecureStore.getItemAsync(CLAVE_URL);
+    if (guardada && !override) override = normalize(guardada);
+  } catch {
+    // Sin SecureStore (web) se usa la detectada.
+  }
+})();
+export async function loadApiUrl() {
+  await urlCargada;
+  return getApiUrl();
+}
+export async function saveApiUrl(url) {
+  const nueva = setApiUrl(url);
+  try {
+    if (nueva) await SecureStore.setItemAsync(CLAVE_URL, nueva);
+    else await SecureStore.deleteItemAsync(CLAVE_URL);
+  } catch {
+    // Queda activa en memoria aunque no se pueda guardar.
+  }
+  return getApiUrl();
+}
+
 export class ApiError extends Error {
   constructor(status, message, details) {
     super(message);
@@ -72,20 +93,19 @@ export class ApiError extends Error {
 
   /** Primer mensaje de validación del backend, si lo hay. */
   get fieldMessage() {
-    return Array.isArray(this.details) && this.details[0]?.message
-      ? this.details[0].message
-      : null;
+    return Array.isArray(this.details) && this.details[0]?.message ? this.details[0].message : null;
   }
 }
 
-async function request(path, { method = 'GET', body, token, timeoutMs = 10000 } = {}) {
+async function request(path, { method = 'GET', body, token, timeoutMs = 15000 } = {}) {
+  await urlCargada;
   const base = getApiUrl();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   let res;
   try {
-    res = await fetch(`${base}${path}`, {
+    res = await fetch(`${base}${PREFIJO}${path}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -105,6 +125,13 @@ async function request(path, { method = 'GET', body, token, timeoutMs = 10000 } 
   return { ok: res.ok, status: res.status, data };
 }
 
+// Quien quiera enterarse de que la sesión murió (el contexto de cuenta).
+const alExpirar = new Set();
+export function onSessionExpired(fn) {
+  alExpirar.add(fn);
+  return () => alExpirar.delete(fn);
+}
+
 // Un solo refresh a la vez aunque varias peticiones reciban 401 al tiempo.
 let refreshing = null;
 
@@ -114,12 +141,10 @@ async function refreshTokens() {
     const { refreshToken } = getTokens();
     if (!refreshToken) return null;
     try {
-      const { ok, data } = await request('/api/auth/refresh', {
-        method: 'POST',
-        body: { refreshToken, client: 'mobile' },
-      });
+      const { ok, data } = await request('/auth/refresh', { method: 'POST', body: { refreshToken } });
       if (!ok || !data?.accessToken) {
         await clearTokens();
+        alExpirar.forEach((fn) => fn());
         return null;
       }
       await saveTokens(data.accessToken, data.refreshToken);
@@ -135,7 +160,7 @@ async function refreshTokens() {
 }
 
 /**
- * Cliente único de la app.
+ * Cliente único de la app. Las rutas son relativas a /api/f360.
  * `auth: true` agrega el access token y, si el backend responde 401, lo renueva
  * con el refresh token y reintenta una vez.
  */

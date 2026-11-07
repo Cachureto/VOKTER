@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Field, PasswordField } from '../src/components/Field';
+import Logo from '../src/components/Logo';
+import { GoldButton } from '../src/components/ui';
 import { useAuth } from '../src/lib/auth-context';
+<<<<<<< Updated upstream
 import { colors } from '../src/theme/colors';
+=======
+import { salirDelAcceso } from '../src/lib/nav';
+import { makeStyles, useTheme } from '../src/theme';
+>>>>>>> Stashed changes
+
 
 export default function Login() {
   const router = useRouter();
+  const { next } = useLocalSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +32,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email.trim(), password);
-      router.replace('/cuenta');
+      salirDelAcceso(router, next);
     } catch (err) {
       setError(err.fieldMessage ?? err.message);
     } finally {
@@ -41,15 +41,11 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Entrar</Text>
-        <Text style={styles.subtitle}>
-          Usa la misma cuenta de la web: pedidos, reseñas y validaciones quedan en un solo lugar.
-        </Text>
+        <Logo />
+        <Text style={styles.title}>Ingresar</Text>
+        <Text style={styles.subtitle}>Entra para apostar, ver tu saldo y seguir tus boletos.</Text>
 
         <Field
           label="Correo"
@@ -60,9 +56,8 @@ export default function Login() {
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="email"
-          style={{ marginTop: 28 }}
+          style={{ marginTop: 26 }}
         />
-
         <PasswordField
           label="Contraseña"
           value={password}
@@ -81,22 +76,12 @@ export default function Login() {
           </View>
         ) : null}
 
-        <Pressable
-          onPress={submit}
-          disabled={loading}
-          style={({ pressed }) => [styles.button, (pressed || loading) && { opacity: 0.75 }]}
-        >
-          {loading ? (
-            <ActivityIndicator color={colors.accentForeground} />
-          ) : (
-            <Text style={styles.buttonText}>Entrar</Text>
-          )}
-        </Pressable>
+        <GoldButton label="Iniciar" onPress={submit} loading={loading} style={{ marginTop: 26 }} />
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>¿No tienes cuenta?</Text>
-          <Pressable onPress={() => router.replace('/registro')} hitSlop={8}>
-            <Text style={styles.link}>Crear una</Text>
+          <Pressable onPress={() => router.replace({ pathname: '/registro', params: next ? { next } : {} })} hitSlop={8}>
+            <Text style={styles.link}>Regístrate</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -106,9 +91,9 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40 },
-  title: { color: colors.foreground, fontSize: 32, fontWeight: '800', letterSpacing: -1 },
-  subtitle: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 8 },
+  content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, width: '100%', maxWidth: 520, alignSelf: 'center' },
+  title: { color: colors.foreground, fontSize: 30, fontWeight: '900', letterSpacing: -0.8, marginTop: 28 },
+  subtitle: { color: colors.muted, fontSize: 14.5, lineHeight: 21, marginTop: 6 },
   alert: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -121,16 +106,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,107,107,0.1)',
   },
   alertText: { flex: 1, color: colors.danger, fontSize: 13.5, lineHeight: 19 },
-  button: {
-    marginTop: 26,
-    height: 52,
-    borderRadius: 999,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: { color: colors.accentForeground, fontSize: 15, fontWeight: '700' },
   footer: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 24 },
   footerText: { color: colors.muted, fontSize: 14 },
+<<<<<<< Updated upstream
   link: { color: colors.accent, fontSize: 14, fontWeight: '700' },
 });
+=======
+  link: { color: colors.accent, fontSize: 14, fontWeight: '800' },
+}));
+>>>>>>> Stashed changes

@@ -37,7 +37,7 @@ export default function WaitlistButton({ dropSlug, disabled }) {
         <CircleCheck size={20} className="shrink-0" />
         <div>
           <p className="font-semibold">Estás en la lista de espera</p>
-          <p className="mt-0.5 opacity-90">Te avisaremos en la app apenas abra el drop.</p>
+          <p className="mt-0.5 opacity-90">Quedaste anotado: cuando abra el drop lo verás en esta página.</p>
         </div>
       </div>
     );
