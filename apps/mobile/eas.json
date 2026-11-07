@@ -16,13 +16,8 @@
         "buildType": "apk"
       },
       "env": {
-<<<<<<< Updated upstream
-        "EXPO_PUBLIC_API_URL": "http://192.168.1.7:4000",
-        "EXPO_PUBLIC_WEB_URL": "http://192.168.1.7:3000"
-=======
         "EXPO_PUBLIC_API_URL": "https://nova-api-kappa.vercel.app",
         "EXPO_PUBLIC_WEB_URL": "https://voktersport.com"
->>>>>>> Stashed changes
       }
     },
     "production": {
@@ -30,13 +25,8 @@
         "buildType": "app-bundle"
       },
       "env": {
-<<<<<<< Updated upstream
-        "EXPO_PUBLIC_API_URL": "https://api.vokter.example",
-        "EXPO_PUBLIC_WEB_URL": "https://vokter.example"
-=======
         "EXPO_PUBLIC_API_URL": "https://nova-api-kappa.vercel.app",
         "EXPO_PUBLIC_WEB_URL": "https://voktersport.com"
->>>>>>> Stashed changes
       }
     }
   },

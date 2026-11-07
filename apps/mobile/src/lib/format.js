@@ -21,8 +21,6 @@ export function formatNumber(value) {
     return String(n);
   }
 }
-<<<<<<< Updated upstream
-=======
 
 /** Cuota con dos decimales y punto, como en la plantilla: 2.85 */
 export const formatOdds = (o) => (Number(o) || 0).toFixed(2);
@@ -86,4 +84,3 @@ export function formatDateTime(iso) {
 
 /** Código corto de un boleto para mostrar: "#E020F777". */
 export const codigoBoleto = (id) => `#${String(id).replace(/-/g, '').slice(0, 8).toUpperCase()}`;
->>>>>>> Stashed changes

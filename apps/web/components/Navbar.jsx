@@ -15,16 +15,6 @@ const LINKS = [
   { href: '/download', label: 'App' },
 ];
 
-<<<<<<< Updated upstream
-=======
-const ANUNCIOS = [
-  'Cada producto con código de autenticidad verificable',
-  'Envíos a toda Colombia',
-  'Asistente de IA que solo responde con el catálogo real',
-  'Drops con lista de espera',
-];
-
->>>>>>> Stashed changes
 function UserMenu({ user, logout }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);

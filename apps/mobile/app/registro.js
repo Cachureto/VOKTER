@@ -5,12 +5,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Field, PasswordField } from '../src/components/Field';
 import { GoldButton } from '../src/components/ui';
 import { useAuth } from '../src/lib/auth-context';
-<<<<<<< Updated upstream
-import { colors } from '../src/theme/colors';
-=======
 import { salirDelAcceso } from '../src/lib/nav';
 import { makeStyles, useTheme } from '../src/theme';
->>>>>>> Stashed changes
 
 const DOCUMENTOS = [
   { value: 'CC', label: 'Cédula' },
@@ -37,6 +33,8 @@ function edad(iso) {
 }
 
 export default function Registro() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   const { next } = useLocalSearchParams();
   const { register } = useAuth();
@@ -191,7 +189,7 @@ export default function Registro() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, width: '100%', maxWidth: 520, alignSelf: 'center' },
   title: { color: colors.foreground, fontSize: 30, fontWeight: '900', letterSpacing: -0.8 },
@@ -224,16 +222,11 @@ const styles = StyleSheet.create({
     padding: 13,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: 'rgba(255,107,107,0.3)',
-    backgroundColor: 'rgba(255,107,107,0.1)',
+    borderColor: colors.dangerLine,
+    backgroundColor: colors.dangerSoft,
   },
   alertText: { flex: 1, color: colors.danger, fontSize: 13.5, lineHeight: 19 },
   footer: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 24 },
   footerText: { color: colors.muted, fontSize: 14 },
-<<<<<<< Updated upstream
-  link: { color: colors.accent, fontSize: 14, fontWeight: '700' },
-});
-=======
   link: { color: colors.accent, fontSize: 14, fontWeight: '800' },
 }));
->>>>>>> Stashed changes

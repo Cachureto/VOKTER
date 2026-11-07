@@ -1,28 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-<<<<<<< Updated upstream
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import * as SecureStore from 'expo-secure-store';
-import { apiFetch, detectApiUrl, detectWebUrl, getApiUrl, setApiUrl } from '../src/lib/api';
-import { colors } from '../src/theme/colors';
-
-const STORAGE_KEY = 'vokter.apiUrl';
-
-// Diagnóstico de conexión: aquí se ve y se corrige la URL del backend.
-export default function Ajustes() {
-  const [url, setUrl] = useState(detectApiUrl());
-  const [editing, setEditing] = useState(false);
-  const [state, setState] = useState({ status: 'loading' });
-=======
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import Constants from 'expo-constants';
 import { GoldButton, OutlineButton, Segmented } from '../src/components/ui';
@@ -44,7 +20,6 @@ export default function Ajustes() {
   const [url, setUrl] = useState(getApiUrl());
   const [editando, setEditando] = useState(false);
   const [estado, setEstado] = useState({ status: 'loading' });
->>>>>>> Stashed changes
 
   const probar = useCallback(async () => {
     setEstado({ status: 'loading' });
@@ -70,20 +45,12 @@ export default function Ajustes() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-<<<<<<< Updated upstream
-        <Text style={styles.title}>Conexión</Text>
-        <Text style={styles.subtitle}>
-          La app detecta sola la IP del PC donde corre Expo. Cámbiala solo si el backend está en
-          otra máquina o en otro puerto.
-        </Text>
-=======
         <Text style={styles.title}>Apariencia</Text>
         <Text style={styles.subtitle}>«Sistema» sigue el modo claro u oscuro del teléfono.</Text>
         <Segmented options={MODOS} value={preference} onChange={setPreference} style={{ marginTop: 14 }} />
 
         <Text style={[styles.title, { marginTop: 32 }]}>Conexión</Text>
         <Text style={styles.subtitle}>Servidor de Fanáticos 360. Cámbialo solo si te lo indica soporte o estás probando en local.</Text>
->>>>>>> Stashed changes
 
         <View style={styles.card}>
           <View style={styles.cardHead}>
@@ -143,26 +110,12 @@ export default function Ajustes() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
-<<<<<<< Updated upstream
-  content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40 },
-  title: { color: colors.foreground, fontSize: 28, fontWeight: '800', letterSpacing: -0.8 },
-  subtitle: { color: colors.muted, fontSize: 14, marginTop: 8, lineHeight: 20 },
-  card: {
-    marginTop: 24,
-    padding: 20,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-=======
   content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40, width: '100%', maxWidth: 640, alignSelf: 'center' },
   title: { color: colors.foreground, fontSize: 24, fontWeight: '900', letterSpacing: -0.5 },
   subtitle: { color: colors.muted, fontSize: 14, marginTop: 6, lineHeight: 20 },
   card: { marginTop: 18, padding: 18, borderRadius: 22, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
->>>>>>> Stashed changes
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   label: { color: colors.subtle, fontSize: 11, letterSpacing: 2, textTransform: 'uppercase' },
   link: { color: colors.accent, fontSize: 13.5, fontWeight: '800' },
@@ -180,43 +133,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   row: { flexDirection: 'row', gap: 10, marginTop: 10 },
-<<<<<<< Updated upstream
-  smallButton: {
-    flex: 1,
-    height: 42,
-    borderRadius: 999,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  smallButtonText: { color: colors.accentForeground, fontSize: 14, fontWeight: '700' },
-  smallButtonGhost: {
-    flex: 1,
-    height: 42,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  smallButtonGhostText: { color: colors.foreground, fontSize: 14, fontWeight: '600' },
-  alert: { marginTop: 20, padding: 14, borderRadius: 14, borderWidth: 1 },
-  alertOk: { borderColor: 'rgba(62,224,137,0.3)', backgroundColor: 'rgba(62,224,137,0.1)' },
-  alertError: { borderColor: 'rgba(255,107,107,0.3)', backgroundColor: 'rgba(255,107,107,0.1)' },
-  alertTitle: { fontSize: 15, fontWeight: '700' },
-  alertText: { color: colors.muted, fontSize: 14, marginTop: 4, lineHeight: 20 },
-  hint: { color: colors.subtle, fontSize: 12, marginTop: 10, lineHeight: 18 },
-  button: {
-    marginTop: 16,
-    height: 50,
-    borderRadius: 999,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: { color: colors.accentForeground, fontSize: 15, fontWeight: '700' },
-});
-=======
   hint: { color: colors.subtle, fontSize: 12.5, marginTop: 8, lineHeight: 18 },
   alert: { marginTop: 16, padding: 14, borderRadius: 14, borderWidth: 1, gap: 3 },
   alertOk: { borderColor: colors.liveLine, backgroundColor: colors.liveSoft },
@@ -225,4 +141,3 @@ const styles = StyleSheet.create({
   alertText: { color: colors.foreground, fontSize: 13.5, lineHeight: 19 },
   version: { color: colors.subtle, fontSize: 12, textAlign: 'center', marginTop: 24, fontFamily: 'monospace' },
 }));
->>>>>>> Stashed changes

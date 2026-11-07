@@ -2,31 +2,18 @@
   "expo": {
     "name": "Fanáticos 360",
     "slug": "vokter",
-<<<<<<< Updated upstream
-    "scheme": "vokter",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#09090b",
-=======
     "scheme": "fanaticos360",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#0b0f15",
->>>>>>> Stashed changes
     "ios": {
       "supportsTablet": false
     },
     "android": {
-<<<<<<< Updated upstream
-      "package": "com.vokter.app",
-=======
       "package": "com.fanaticos360.app",
       "versionCode": 1,
->>>>>>> Stashed changes
       "adaptiveIcon": {
         "backgroundColor": "#0b0f15",
         "foregroundImage": "./assets/android-icon-foreground.png",
