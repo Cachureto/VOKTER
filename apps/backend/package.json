@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch --env-file=.env src/server.js",
     "start": "node --env-file=.env src/server.js",
+    "start:prod": "node src/server.js",
     "db:seed": "node --env-file=.env scripts/seed.js",
     "db:admin": "node --env-file=.env scripts/make-admin.js",
     "db:migrate": "node --env-file=.env scripts/migrate.js"

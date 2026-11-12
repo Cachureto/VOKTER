@@ -32,3 +32,12 @@ export const createDropSchema = z.object({
 export const updateDropStatusSchema = z.object({
   status: z.enum(['scheduled', 'live', 'sold_out', 'ended', 'cancelled']),
 });
+
+export const updateDropSchema = z.object({
+  name: z.string().trim().min(2).max(160).optional(),
+  description: z.string().trim().max(5000).optional(),
+  coverUrl: imageUrl.nullable().optional(),
+  launchAt: z.coerce.date().optional(),
+  endsAt: z.coerce.date().nullable().optional(),
+  productIds: z.array(z.uuid()).min(1, 'Selecciona al menos un producto').optional(),
+});
