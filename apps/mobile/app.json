@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Fanáticos 360",
-    "slug": "vokter",
+    "slug": "fanaticos-360",
     "scheme": "fanaticos360",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -45,10 +45,10 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "36cb665e-2ca7-4f58-a314-288fe6fa2202"
+        "projectId": "613c149d-0574-41ed-82af-c413991e7b5b"
       }
     },
-    "owner": "pipeeex",
+    "owner": "vokter",
     "web": {
       "favicon": "./assets/favicon.png"
     }
