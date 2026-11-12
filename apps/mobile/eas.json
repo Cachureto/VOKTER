@@ -27,7 +27,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://nova-api-kappa.vercel.app",
+        "EXPO_PUBLIC_API_URL": "https://fanaticos360-api.vercel.app",
         "EXPO_PUBLIC_WEB_URL": "https://voktersport.com"
       }
     },
@@ -36,7 +36,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://nova-api-kappa.vercel.app",
+        "EXPO_PUBLIC_API_URL": "https://fanaticos360-api.vercel.app",
         "EXPO_PUBLIC_WEB_URL": "https://voktersport.com"
       }
     }
