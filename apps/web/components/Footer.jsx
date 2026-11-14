@@ -39,7 +39,7 @@ const PILLARS = [
 export default function Footer() {
   return (
     <footer className="mt-24 border-t border-border bg-surface/40">
-      <div className="container-page grid gap-12 py-16 lg:grid-cols-[1.4fr_2fr_auto] lg:items-stretch">
+      <div className="container-page grid gap-12 py-16 lg:grid-cols-[1.4fr_2fr]">
         <div className="max-w-sm">
           <Logo />
           <p className="mt-5 text-sm leading-relaxed text-muted">
@@ -71,15 +71,6 @@ export default function Footer() {
               </ul>
             </div>
           ))}
-        </div>
-
-        <div className="flex items-center justify-center lg:h-full lg:justify-end">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/badge-alta-calidad-v3.png"
-            alt="Sello de alta calidad"
-            className="h-44 w-44 object-contain"
-          />
         </div>
       </div>
 
