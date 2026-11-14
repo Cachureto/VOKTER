@@ -73,7 +73,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="flex items-center justify-center lg:h-full lg:justify-end">
+        <div className="flex items-start justify-center lg:-mt-6 lg:justify-end">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/badge-alta-calidad-v3.png"
