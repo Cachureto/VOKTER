@@ -1,4 +1,4 @@
-# Vokter — Verified Urban Tech Commerce
+# Vokter — Verified Tech Commerce
 
 Vokter is a full-stack e-commerce platform for urban tech, accessories and home goods. Instead of
 being a generic multi-category store, Vokter is built around three differentiators: **verified
