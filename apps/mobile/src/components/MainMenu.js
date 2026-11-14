@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  Modal,
-  PanResponder,
-  Pressable,
-  Share,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Animated, Easing, Modal, PanResponder, Pressable, Share, Text, useWindowDimensions, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { usePathname, useRouter } from 'expo-router';
@@ -23,6 +13,7 @@ import { useMenu } from '../lib/menu-context';
 import { makeStyles, useTheme } from '../theme';
 import AccordionItem from './Accordion';
 import Logo from './Logo';
+import Tap from './Tap';
 
 const MODOS = [
   { value: 'system', label: 'Sistema' },
@@ -152,6 +143,25 @@ export default function MainMenu() {
 
   if (!visible) return null;
 
+  // Cada fila entra un poco después de la anterior, deslizándose desde la
+  // izquierda: el menú se "despliega" en cascada en vez de aparecer de golpe.
+  const entrada = (i) => {
+    const desde = Math.min(0.12 + i * 0.07, 0.6);
+    const hasta = Math.min(desde + 0.4, 1);
+    return {
+      opacity: t.interpolate({ inputRange: [0, desde, hasta], outputRange: [0, 0, 1], extrapolate: 'clamp' }),
+      transform: [
+        {
+          translateX: t.interpolate({
+            inputRange: [0, desde, hasta],
+            outputRange: [-28, -28, 0],
+            extrapolate: 'clamp',
+          }),
+        },
+      ],
+    };
+  };
+
   const enVivo = ligas.reduce((n, l) => n + (l.live ?? 0), 0);
   const proximos = ligas.reduce((n, l) => n + (l.upcoming ?? 0), 0);
   const iniciales = user?.name
@@ -161,7 +171,14 @@ export default function MainMenu() {
     .join('');
 
   return (
-    <Modal visible transparent statusBarTranslucent navigationBarTranslucent animationType="none" onRequestClose={close}>
+    <Modal
+      visible
+      transparent
+      statusBarTranslucent
+      navigationBarTranslucent
+      animationType="none"
+      onRequestClose={close}
+    >
       <Animated.View style={[styles.backdrop, { opacity: t }]}>
         <Pressable style={{ flex: 1 }} onPress={close} accessibilityLabel="Cerrar menú" />
       </Animated.View>
@@ -184,215 +201,279 @@ export default function MainMenu() {
             <Logo size="compact" />
           </Pressable>
           <Pressable onPress={close} hitSlop={8} style={styles.close} accessibilityLabel="Cerrar menú">
-            <Ionicons name="close" size={22} color={colors.foreground} />
+            <Animated.View
+              style={{
+                transform: [{ rotate: t.interpolate({ inputRange: [0, 1], outputRange: ['-90deg', '0deg'] }) }],
+              }}
+            >
+              <Ionicons name="close" size={22} color={colors.foreground} />
+            </Animated.View>
           </Pressable>
         </View>
 
-        <Animated.ScrollView
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          style={{
-            opacity: t.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 0.5, 1] }),
-            transform: [{ translateX: t.interpolate({ inputRange: [0, 1], outputRange: [-36, 0] }) }],
-          }}
-        >
+        <Animated.ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
           {/* Saldo arriba, que es lo que más se consulta. */}
           {user && (
-            <Pressable
-              onPress={() => ir('/billetera')}
-              style={({ pressed }) => [styles.balance, pressed && styles.pressed]}
-              accessibilityRole="button"
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={styles.balanceLabel}>Saldo disponible</Text>
-                <Text style={styles.balanceValue}>{formatCOP(wallet?.balanceCop ?? 0)}</Text>
-              </View>
-              <View style={styles.balanceBtn}>
-                <Ionicons name="add" size={16} color={colors.accentForeground} />
-                <Text style={styles.balanceBtnText}>Depositar</Text>
-              </View>
-            </Pressable>
+            <Animated.View style={entrada(0)}>
+              <Pressable
+                onPress={() => ir('/billetera')}
+                style={({ pressed }) => [styles.balance, pressed && styles.pressed]}
+                accessibilityRole="button"
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.balanceLabel}>Saldo disponible</Text>
+                  <Text style={styles.balanceValue}>{formatCOP(wallet?.balanceCop ?? 0)}</Text>
+                </View>
+                <View style={styles.balanceBtn}>
+                  <Ionicons name="add" size={16} color={colors.accentForeground} />
+                  <Text style={styles.balanceBtnText}>Depositar</Text>
+                </View>
+              </Pressable>
+            </Animated.View>
           )}
 
-          <Pressable
-            onPress={alInicio}
-            style={({ pressed }) => [styles.home, pressed && styles.pressed]}
-            accessibilityRole="button"
-          >
-            <View style={[styles.homeIcon, pathname === '/' && styles.homeIconOn]}>
-              <Ionicons name="home-outline" size={18} color={pathname === '/' ? colors.accentForeground : colors.foreground} />
-            </View>
-            <Text style={styles.homeText}>Inicio</Text>
-            {pathname === '/' && <Text style={styles.here}>Estás aquí</Text>}
-          </Pressable>
+          <Animated.View style={entrada(1)}>
+            <Pressable
+              onPress={alInicio}
+              style={({ pressed }) => [styles.home, pressed && styles.pressed]}
+              accessibilityRole="button"
+            >
+              <View style={[styles.homeIcon, pathname === '/' && styles.homeIconOn]}>
+                <Ionicons
+                  name="home-outline"
+                  size={18}
+                  color={pathname === '/' ? colors.accentForeground : colors.foreground}
+                />
+              </View>
+              <Text style={styles.homeText}>Inicio</Text>
+              {pathname === '/' && <Text style={styles.here}>Estás aquí</Text>}
+            </Pressable>
+          </Animated.View>
 
-          <View style={styles.divider} />
+          <Animated.View style={[styles.divider, entrada(1)]} />
 
           {/* ---------- Partidos ---------- */}
-          <AccordionItem
-            icon="football-outline"
-            title="Partidos"
-            summary={enVivo > 0 ? `${enVivo} en vivo · ${proximos} próximos` : proximos ? `${proximos} próximos` : 'Calendario y cuotas'}
-            expanded={seccion === 'partidos'}
-            active={actual === 'partidos'}
-            onToggle={() => alternar('partidos')}
-          >
-            <LinkRow icon="list-outline" label="Todos los partidos" onPress={() => ir('/partidos')} strong />
-            <LinkRow
-              icon="radio-outline"
-              label="En vivo"
-              meta={enVivo ? String(enVivo) : undefined}
-              onPress={() => ir({ pathname: '/partidos', params: { status: 'live' } })}
-            />
-            {ligas.map((l) => {
-              const e = estiloLiga(l, colors);
-              return (
-                <LinkRow
-                  key={l.id}
-                  icon={e.icon}
-                  iconColor={e.fg}
-                  label={l.name}
-                  meta={l.upcoming ? String(l.upcoming) : undefined}
-                  onPress={() => ir({ pathname: '/partidos', params: { league: String(l.id) } })}
-                />
-              );
-            })}
-            <LinkRow
-              icon="checkmark-done-outline"
-              label="Resultados"
-              onPress={() => ir({ pathname: '/partidos', params: { status: 'finished' } })}
-            />
-          </AccordionItem>
-
-          {/* ---------- Mis apuestas ---------- */}
-          <AccordionItem
-            icon="receipt-outline"
-            title="Mis apuestas"
-            summary={
-              slip.count > 0
-                ? `Boleto: ${slip.count} selección${slip.count === 1 ? '' : 'es'}`
-                : user && wallet?.openBets
-                  ? `${wallet.openBets} abierta${wallet.openBets === 1 ? '' : 's'}`
-                  : 'Boleto e historial'
-            }
-            expanded={seccion === 'apuestas'}
-            active={actual === 'apuestas'}
-            onToggle={() => alternar('apuestas')}
-          >
-            <LinkRow
-              icon="ticket-outline"
-              label="Boleto actual"
-              meta={slip.count ? String(slip.count) : undefined}
-              onPress={() => ir('/boleto')}
-              strong
-            />
-            <LinkRow icon="time-outline" label="Apuestas abiertas" onPress={() => ir({ pathname: '/apuestas', params: { status: 'open' } })} />
-            <LinkRow icon="archive-outline" label="Historial" onPress={() => ir({ pathname: '/apuestas', params: { status: 'settled' } })} />
-          </AccordionItem>
-
-          {/* ---------- Billetera ---------- */}
-          <AccordionItem
-            icon="wallet-outline"
-            title="Billetera"
-            summary={user ? formatCOP(wallet?.balanceCop ?? 0) : 'Depósitos y retiros'}
-            expanded={seccion === 'billetera'}
-            active={actual === 'billetera'}
-            onToggle={() => alternar('billetera')}
-          >
-            {user ? (
-              <>
-                <LinkRow icon="arrow-down-circle-outline" label="Depositar" onPress={() => ir({ pathname: '/billetera', params: { tab: 'depositar' } })} strong />
-                <LinkRow icon="arrow-up-circle-outline" label="Retirar" onPress={() => ir({ pathname: '/billetera', params: { tab: 'retirar' } })} />
-                <LinkRow icon="swap-vertical-outline" label="Movimientos" onPress={() => ir({ pathname: '/billetera', params: { tab: 'movimientos' } })} />
-              </>
-            ) : (
-              <Text style={styles.note}>Inicia sesión para ver tu saldo, depositar y retirar.</Text>
-            )}
-          </AccordionItem>
-
-          {/* ---------- Cuenta ---------- */}
-          <AccordionItem
-            icon="person-outline"
-            title="Cuenta"
-            summary={user ? user.name : 'Ingresa o regístrate'}
-            expanded={seccion === 'cuenta'}
-            active={actual === 'cuenta'}
-            onToggle={() => alternar('cuenta')}
-          >
-            {user ? (
-              <>
-                <View style={styles.userCard}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{iniciales}</Text>
-                  </View>
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={styles.userName} numberOfLines={1}>
-                      {user.name}
-                    </Text>
-                    <Text style={styles.userEmail} numberOfLines={1}>
-                      {user.email}
-                    </Text>
-                  </View>
-                </View>
-                <LinkRow icon="person-circle-outline" label="Mi cuenta" onPress={() => ir('/cuenta')} />
-                <LinkRow icon="shield-checkmark-outline" label="Juego responsable" hint="Límites y autoexclusión" onPress={() => ir('/juego-responsable')} />
-                <LinkRow
-                  icon="log-out-outline"
-                  label="Cerrar sesión"
-                  danger
-                  chevron={false}
-                  onPress={async () => {
-                    close();
-                    await logout();
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                <Text style={styles.note}>Tu cuenta guarda tus apuestas, tu saldo y tus límites de juego.</Text>
-                <View style={styles.authRow}>
-                  <Pressable onPress={() => ir('/login')} style={({ pressed }) => [styles.primary, styles.flex1, pressed && { opacity: 0.85 }]}>
-                    <Text style={styles.primaryText}>Iniciar</Text>
-                  </Pressable>
-                  <Pressable onPress={() => ir('/registro')} style={({ pressed }) => [styles.secondary, styles.flex1, pressed && styles.pressed]}>
-                    <Text style={styles.secondaryText}>Registrarse</Text>
-                  </Pressable>
-                </View>
-                <LinkRow icon="shield-checkmark-outline" label="Juego responsable" onPress={() => ir('/juego-responsable')} />
-              </>
-            )}
-          </AccordionItem>
-
-          {/* ---------- App ---------- */}
-          <AccordionItem
-            icon="phone-portrait-outline"
-            title="App"
-            summary="Apariencia, conexión y términos"
-            expanded={seccion === 'app'}
-            active={actual === 'app'}
-            onToggle={() => alternar('app')}
-          >
-            <Text style={styles.label}>Apariencia</Text>
-            <View style={styles.segment}>
-              {MODOS.map((m) => {
-                const on = preference === m.value;
+          <Animated.View style={entrada(2)}>
+            <AccordionItem
+              icon="football-outline"
+              title="Partidos"
+              summary={
+                enVivo > 0
+                  ? `${enVivo} en vivo · ${proximos} próximos`
+                  : proximos
+                    ? `${proximos} próximos`
+                    : 'Calendario y cuotas'
+              }
+              expanded={seccion === 'partidos'}
+              active={actual === 'partidos'}
+              onToggle={() => alternar('partidos')}
+            >
+              <LinkRow icon="list-outline" label="Todos los partidos" onPress={() => ir('/partidos')} strong />
+              <LinkRow
+                icon="radio-outline"
+                label="En vivo"
+                meta={enVivo ? String(enVivo) : undefined}
+                onPress={() => ir({ pathname: '/partidos', params: { status: 'live' } })}
+              />
+              {ligas.map((l) => {
+                const e = estiloLiga(l, colors);
                 return (
-                  <Pressable
-                    key={m.value}
-                    onPress={() => setPreference(m.value)}
-                    style={[styles.segmentItem, on && styles.segmentOn]}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: on }}
-                  >
-                    <Text style={[styles.segmentText, on && styles.segmentTextOn]}>{m.label}</Text>
-                  </Pressable>
+                  <LinkRow
+                    key={l.id}
+                    icon={e.icon}
+                    iconColor={e.fg}
+                    label={l.name}
+                    meta={l.upcoming ? String(l.upcoming) : undefined}
+                    onPress={() => ir({ pathname: '/partidos', params: { league: String(l.id) } })}
+                  />
                 );
               })}
-            </View>
-            <LinkRow icon="server-outline" label="Conexión con el servidor" onPress={() => ir('/ajustes')} />
-            <LinkRow icon="document-text-outline" label="Términos y condiciones" onPress={() => ir('/terminos')} />
-            <LinkRow icon="share-social-outline" label="Compartir Fanáticos 360" onPress={compartir} chevron={false} />
-          </AccordionItem>
+              <LinkRow
+                icon="checkmark-done-outline"
+                label="Resultados"
+                onPress={() => ir({ pathname: '/partidos', params: { status: 'finished' } })}
+              />
+            </AccordionItem>
+          </Animated.View>
+
+          {/* ---------- Mis apuestas ---------- */}
+          <Animated.View style={entrada(3)}>
+            <AccordionItem
+              icon="receipt-outline"
+              title="Mis apuestas"
+              summary={
+                slip.count > 0
+                  ? `Boleto: ${slip.count} selección${slip.count === 1 ? '' : 'es'}`
+                  : user && wallet?.openBets
+                    ? `${wallet.openBets} abierta${wallet.openBets === 1 ? '' : 's'}`
+                    : 'Boleto e historial'
+              }
+              expanded={seccion === 'apuestas'}
+              active={actual === 'apuestas'}
+              onToggle={() => alternar('apuestas')}
+            >
+              <LinkRow
+                icon="ticket-outline"
+                label="Boleto actual"
+                meta={slip.count ? String(slip.count) : undefined}
+                onPress={() => ir('/boleto')}
+                strong
+              />
+              <LinkRow
+                icon="time-outline"
+                label="Apuestas abiertas"
+                onPress={() => ir({ pathname: '/apuestas', params: { status: 'open' } })}
+              />
+              <LinkRow
+                icon="archive-outline"
+                label="Historial"
+                onPress={() => ir({ pathname: '/apuestas', params: { status: 'settled' } })}
+              />
+            </AccordionItem>
+          </Animated.View>
+
+          {/* ---------- Billetera ---------- */}
+          <Animated.View style={entrada(4)}>
+            <AccordionItem
+              icon="wallet-outline"
+              title="Billetera"
+              summary={user ? formatCOP(wallet?.balanceCop ?? 0) : 'Depósitos y retiros'}
+              expanded={seccion === 'billetera'}
+              active={actual === 'billetera'}
+              onToggle={() => alternar('billetera')}
+            >
+              {user ? (
+                <>
+                  <LinkRow
+                    icon="arrow-down-circle-outline"
+                    label="Depositar"
+                    onPress={() => ir({ pathname: '/billetera', params: { tab: 'depositar' } })}
+                    strong
+                  />
+                  <LinkRow
+                    icon="arrow-up-circle-outline"
+                    label="Retirar"
+                    onPress={() => ir({ pathname: '/billetera', params: { tab: 'retirar' } })}
+                  />
+                  <LinkRow
+                    icon="swap-vertical-outline"
+                    label="Movimientos"
+                    onPress={() => ir({ pathname: '/billetera', params: { tab: 'movimientos' } })}
+                  />
+                </>
+              ) : (
+                <Text style={styles.note}>Inicia sesión para ver tu saldo, depositar y retirar.</Text>
+              )}
+            </AccordionItem>
+          </Animated.View>
+
+          {/* ---------- Cuenta ---------- */}
+          <Animated.View style={entrada(5)}>
+            <AccordionItem
+              icon="person-outline"
+              title="Cuenta"
+              summary={user ? user.name : 'Ingresa o regístrate'}
+              expanded={seccion === 'cuenta'}
+              active={actual === 'cuenta'}
+              onToggle={() => alternar('cuenta')}
+            >
+              {user ? (
+                <>
+                  <View style={styles.userCard}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>{iniciales}</Text>
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.userName} numberOfLines={1}>
+                        {user.name}
+                      </Text>
+                      <Text style={styles.userEmail} numberOfLines={1}>
+                        {user.email}
+                      </Text>
+                    </View>
+                  </View>
+                  <LinkRow icon="person-circle-outline" label="Mi cuenta" onPress={() => ir('/cuenta')} />
+                  <LinkRow
+                    icon="shield-checkmark-outline"
+                    label="Juego responsable"
+                    hint="Límites y autoexclusión"
+                    onPress={() => ir('/juego-responsable')}
+                  />
+                  <LinkRow
+                    icon="log-out-outline"
+                    label="Cerrar sesión"
+                    danger
+                    chevron={false}
+                    onPress={async () => {
+                      close();
+                      await logout();
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <Text style={styles.note}>Tu cuenta guarda tus apuestas, tu saldo y tus límites de juego.</Text>
+                  <View style={styles.authRow}>
+                    <Pressable
+                      onPress={() => ir('/login')}
+                      style={({ pressed }) => [styles.primary, styles.flex1, pressed && { opacity: 0.85 }]}
+                    >
+                      <Text style={styles.primaryText}>Iniciar</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => ir('/registro')}
+                      style={({ pressed }) => [styles.secondary, styles.flex1, pressed && styles.pressed]}
+                    >
+                      <Text style={styles.secondaryText}>Registrarse</Text>
+                    </Pressable>
+                  </View>
+                  <LinkRow
+                    icon="shield-checkmark-outline"
+                    label="Juego responsable"
+                    onPress={() => ir('/juego-responsable')}
+                  />
+                </>
+              )}
+            </AccordionItem>
+          </Animated.View>
+
+          {/* ---------- App ---------- */}
+          <Animated.View style={entrada(6)}>
+            <AccordionItem
+              icon="phone-portrait-outline"
+              title="App"
+              summary="Apariencia, conexión y términos"
+              expanded={seccion === 'app'}
+              active={actual === 'app'}
+              onToggle={() => alternar('app')}
+            >
+              <Text style={styles.label}>Apariencia</Text>
+              <View style={styles.segment}>
+                {MODOS.map((m) => {
+                  const on = preference === m.value;
+                  return (
+                    <Pressable
+                      key={m.value}
+                      onPress={() => setPreference(m.value)}
+                      style={[styles.segmentItem, on && styles.segmentOn]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: on }}
+                    >
+                      <Text style={[styles.segmentText, on && styles.segmentTextOn]}>{m.label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <LinkRow icon="server-outline" label="Conexión con el servidor" onPress={() => ir('/ajustes')} />
+              <LinkRow icon="document-text-outline" label="Términos y condiciones" onPress={() => ir('/terminos')} />
+              <LinkRow
+                icon="share-social-outline"
+                label="Compartir Fanáticos 360"
+                onPress={compartir}
+                chevron={false}
+              />
+            </AccordionItem>
+          </Animated.View>
         </Animated.ScrollView>
 
         <View style={styles.footer}>
@@ -415,7 +496,12 @@ function LinkRow({ icon, iconColor, label, hint, meta, onPress, strong, danger, 
   const { colors } = useTheme();
   const tono = danger ? colors.danger : strong ? colors.foreground : colors.muted;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.link, pressed && styles.pressed]} accessibilityRole="button">
+    <Tap
+      onPress={onPress}
+      scaleTo={0.97}
+      style={({ pressed }) => [styles.link, pressed && styles.pressed]}
+      accessibilityRole="button"
+    >
       <Ionicons
         name={icon}
         size={17}
@@ -433,7 +519,7 @@ function LinkRow({ icon, iconColor, label, hint, meta, onPress, strong, danger, 
         </View>
       )}
       {chevron && <Ionicons name="chevron-forward" size={15} color={colors.subtle} />}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -490,7 +576,13 @@ const useStyles = makeStyles((colors) => ({
     backgroundColor: colors.accentSoft,
   },
   balanceLabel: { color: colors.muted, fontSize: 12, fontWeight: '600' },
-  balanceValue: { color: colors.foreground, fontSize: 21, fontWeight: '900', marginTop: 2, fontVariant: ['tabular-nums'] },
+  balanceValue: {
+    color: colors.foreground,
+    fontSize: 21,
+    fontWeight: '900',
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
+  },
   balanceBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -514,10 +606,25 @@ const useStyles = makeStyles((colors) => ({
   homeText: { flex: 1, color: colors.foreground, fontSize: 15.5, fontWeight: '700' },
   here: { color: colors.subtle, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' },
   divider: { height: 1, backgroundColor: colors.border, marginHorizontal: 12, marginVertical: 4 },
-  link: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, paddingHorizontal: 10, borderRadius: 12 },
+  link: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+  },
   linkText: { fontSize: 14.5 },
   linkHint: { color: colors.subtle, fontSize: 12, marginTop: 1 },
-  meta: { minWidth: 24, paddingHorizontal: 7, height: 20, borderRadius: 6, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
+  meta: {
+    minWidth: 24,
+    paddingHorizontal: 7,
+    height: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface2,
+  },
   metaText: { color: colors.muted, fontSize: 11.5, fontWeight: '800', fontVariant: ['tabular-nums'] },
   note: { color: colors.muted, fontSize: 13, lineHeight: 19, paddingHorizontal: 10, paddingVertical: 6 },
   label: {
@@ -576,7 +683,14 @@ const useStyles = makeStyles((colors) => ({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accent,
+  },
   avatarText: { color: colors.accentForeground, fontSize: 15, fontWeight: '800' },
   userName: { color: colors.foreground, fontSize: 14.5, fontWeight: '700' },
   userEmail: { color: colors.muted, fontSize: 12.5, marginTop: 1 },

@@ -1,18 +1,34 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, Pressable, Text, View } from 'react-native';
+import { Animated, Easing, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBetSlip } from '../lib/betslip-context';
+import { ALTO_BOLETO, ALTO_NAV, conNav } from '../lib/layout';
 import { formatCOP, formatOdds } from '../lib/format';
 import { DORADO } from '../theme/colors';
+import { Pop, useCountUp } from './Motion';
+import Tap from './Tap';
 import { makeStyles } from '../theme';
 
 // En estas pantallas la barra estorbaría (o ya se está viendo el boleto).
-const OCULTA_EN = ['/boleto', '/login', '/registro', '/billetera', '/juego-responsable', '/ajustes', '/terminos', '/cuenta'];
+const OCULTA_EN = [
+  '/boleto',
+  '/login',
+  '/registro',
+  '/billetera',
+  '/juego-responsable',
+  '/ajustes',
+  '/terminos',
+  '/cuenta',
+  '/apuestas',
+];
 
-/** Alto que ocupa la barra: las pantallas lo dejan libre al final de su lista. */
-export const ALTO_BARRA = 96;
+/**
+ * Espacio que dejan libre al final las pantallas principales: la barra de
+ * navegación más la del boleto, que va justo encima.
+ */
+export const ALTO_BARRA = ALTO_NAV + ALTO_BOLETO + 16;
 
 /**
  * Barra flotante del boleto: aparece desde abajo en cuanto hay una selección
@@ -25,6 +41,8 @@ export default function BetSlipBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const { count, totalOdds, potentialPayout } = useBetSlip();
+  const ganancia = useCountUp(potentialPayout);
+  const cuota = useCountUp(totalOdds);
   const visible = count > 0 && !OCULTA_EN.some((r) => pathname.startsWith(r));
   const t = useRef(new Animated.Value(visible ? 1 : 0)).current;
 
@@ -43,30 +61,32 @@ export default function BetSlipBar() {
       style={[
         styles.wrap,
         {
-          paddingBottom: insets.bottom + 12,
+          // Con la barra de navegación visible, el boleto flota justo encima.
+          paddingBottom: insets.bottom + (conNav(pathname) ? ALTO_NAV + 18 : 12),
           opacity: t,
           transform: [{ translateY: t.interpolate({ inputRange: [0, 1], outputRange: [120, 0] }) }],
         },
       ]}
     >
-      <Pressable
+      <Tap
         onPress={() => router.push('/boleto')}
-        style={({ pressed }) => [styles.bar, pressed && { transform: [{ scale: 0.98 }] }]}
+        scaleTo={0.97}
+        style={styles.bar}
         accessibilityRole="button"
         accessibilityLabel={`Ver boleto: ${count} selecciones, cuota ${formatOdds(totalOdds)}`}
       >
-        <View style={styles.count}>
+        <Pop trigger={count} scale={1.35} style={styles.count}>
           <Text style={styles.countText}>{count}</Text>
-        </View>
+        </Pop>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.title}>{count === 1 ? 'Apuesta simple' : `Combinada de ${count}`}</Text>
           <Text style={styles.sub} numberOfLines={1}>
-            Cuota {formatOdds(totalOdds)} · Ganas {formatCOP(potentialPayout)}
+            Cuota {formatOdds(cuota)} · Ganas {formatCOP(Math.round(ganancia))}
           </Text>
         </View>
         <Text style={styles.cta}>Ver boleto</Text>
         <Ionicons name="chevron-forward" size={18} color={DORADO.texto} />
-      </Pressable>
+      </Tap>
     </Animated.View>
   );
 }
@@ -77,9 +97,9 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    height: 64,
-    paddingHorizontal: 14,
-    borderRadius: 20,
+    height: 58,
+    paddingHorizontal: 12,
+    borderRadius: 18,
     backgroundColor: DORADO.fondo,
     shadowColor: '#000',
     shadowOpacity: 0.35,

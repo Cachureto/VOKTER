@@ -12,7 +12,7 @@ export default function SectionHeading({ title, onLink, linkLabel = 'Ver todo', 
       {onLink && (
         <Pressable onPress={onLink} hitSlop={10} style={styles.link} accessibilityRole="link">
           <Text style={styles.linkText}>{linkLabel}</Text>
-          <Ionicons name="chevron-forward" size={17} color={colors.accent} />
+          <Ionicons name="chevron-forward" size={13} color={colors.muted} />
         </Pressable>
       )}
     </View>
@@ -20,8 +20,17 @@ export default function SectionHeading({ title, onLink, linkLabel = 'Ver todo', 
 }
 
 const useStyles = makeStyles((colors) => ({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 },
-  title: { flex: 1, color: colors.foreground, fontSize: 22, fontWeight: '900', letterSpacing: -0.4 },
-  link: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  linkText: { color: colors.accent, fontSize: 15, fontWeight: '800' },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12 },
+  title: { flex: 1, color: colors.foreground, fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+  link: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingLeft: 10,
+    paddingRight: 6,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: colors.surface2,
+  },
+  linkText: { color: colors.foreground, fontSize: 12.5, fontWeight: '700' },
 }));

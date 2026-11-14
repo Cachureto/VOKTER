@@ -2,10 +2,13 @@
  * Piezas pequeñas que se repiten en toda la app: botón dorado, botón de
  * contorno, pastillas de estado, selector segmentado y estado vacío.
  */
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { movimientoReducido, RESORTES } from '../lib/motion';
 import { DORADO } from '../theme/colors';
+import Tap from './Tap';
 import { makeStyles, useTheme } from '../theme';
 
 /** El botón dorado de la plantilla ("Iniciar", "Ingresar"). */
@@ -13,21 +16,13 @@ export function GoldButton({ label, onPress, icon, loading, disabled, style, siz
   const styles = useStyles();
   const apagado = disabled || loading;
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       disabled={apagado}
       accessibilityRole="button"
-      style={({ pressed }) => [
-        styles.gold,
-        size === 'sm' && styles.goldSm,
-        apagado && { opacity: 0.55 },
-        pressed && styles.pressed,
-        style,
-      ]}
+      scaleTo={0.96}
+      style={[styles.gold, size === 'sm' && styles.goldSm, apagado && { opacity: 0.55 }, style]}
     >
-      {/* Media capa clara arriba: imita el degradado de la plantilla sin
-          sumar una dependencia nativa nueva. */}
-      <View style={styles.goldShine} pointerEvents="none" />
       {loading ? (
         <ActivityIndicator color={DORADO.texto} />
       ) : (
@@ -36,7 +31,7 @@ export function GoldButton({ label, onPress, icon, loading, disabled, style, siz
           <Text style={[styles.goldText, size === 'sm' && styles.goldTextSm]}>{label}</Text>
         </>
       )}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -46,21 +41,22 @@ export function OutlineButton({ label, onPress, icon, style, tone = 'accent', di
   const { colors } = useTheme();
   const color = tone === 'danger' ? colors.danger : tone === 'neutral' ? colors.foreground : colors.accent;
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
+      scaleTo={0.96}
       style={({ pressed }) => [
         styles.outline,
         { borderColor: tone === 'neutral' ? colors.borderStrong : color },
+        pressed && { backgroundColor: colors.surfaceHover },
         disabled && { opacity: 0.5 },
-        pressed && styles.pressed,
         style,
       ]}
     >
       {icon && <Ionicons name={icon} size={17} color={color} />}
       <Text style={[styles.outlineText, { color }]}>{label}</Text>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -84,18 +80,55 @@ export function Pill({ label, tone = 'accent', icon, style }) {
   );
 }
 
-/** Selector de pestañas: [{ value, label }]. */
+/**
+ * Selector de pestañas: [{ value, label }]. La pastilla dorada se desliza
+ * hasta la opción elegida en vez de saltar.
+ */
 export function Segmented({ options, value, onChange, style }) {
   const styles = useStyles();
+  const [ancho, setAncho] = useState(0);
+  const indice = Math.max(
+    0,
+    options.findIndex((o) => o.value === value),
+  );
+  const x = useRef(new Animated.Value(indice)).current;
+
+  useEffect(() => {
+    if (movimientoReducido()) x.setValue(indice);
+    else Animated.spring(x, { toValue: indice, ...RESORTES.deslizar, useNativeDriver: true }).start();
+  }, [indice, x]);
+
+  // 4 de padding a cada lado y 4 de separación entre opciones.
+  const anchoItem = ancho ? (ancho - 8 - 4 * (options.length - 1)) / options.length : 0;
+
   return (
-    <View style={[styles.segment, style]}>
+    <View style={[styles.segment, style]} onLayout={(e) => setAncho(e.nativeEvent.layout.width)}>
+      {anchoItem > 0 && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.segmentPill,
+            {
+              width: anchoItem,
+              transform: [
+                {
+                  translateX: x.interpolate({
+                    inputRange: [0, Math.max(1, options.length - 1)],
+                    outputRange: [0, Math.max(1, options.length - 1) * (anchoItem + 4)],
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
+      )}
       {options.map((o) => {
         const on = o.value === value;
         return (
           <Pressable
             key={o.value}
             onPress={() => onChange(o.value)}
-            style={[styles.segmentItem, on && styles.segmentOn]}
+            style={styles.segmentItem}
             accessibilityRole="tab"
             accessibilityState={{ selected: on }}
           >
@@ -151,8 +184,16 @@ export function LoginRequired({ next, title = 'Inicia sesión', text }) {
       text={text}
       action={
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 8, alignSelf: 'stretch' }}>
-          <GoldButton label="Iniciar" onPress={() => router.push({ pathname: '/login', params: next ? { next } : {} })} style={{ flex: 1 }} />
-          <OutlineButton label="Registrarse" onPress={() => router.push({ pathname: '/registro', params: next ? { next } : {} })} style={{ flex: 1 }} />
+          <GoldButton
+            label="Iniciar"
+            onPress={() => router.push({ pathname: '/login', params: next ? { next } : {} })}
+            style={{ flex: 1 }}
+          />
+          <OutlineButton
+            label="Registrarse"
+            onPress={() => router.push({ pathname: '/registro', params: next ? { next } : {} })}
+            style={{ flex: 1 }}
+          />
         </View>
       }
     />
@@ -166,51 +207,41 @@ const useStyles = makeStyles((colors) => ({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 54,
-    paddingHorizontal: 22,
-    borderRadius: 16,
+    height: 50,
+    paddingHorizontal: 20,
+    borderRadius: 14,
     backgroundColor: DORADO.fondo,
-    overflow: 'hidden',
     shadowColor: DORADO.fondo,
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+    elevation: 3,
   },
-  goldSm: { height: 44, borderRadius: 14, paddingHorizontal: 16 },
-  goldShine: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '50%',
-    backgroundColor: DORADO.brillo,
-    opacity: 0.35,
-  },
-  goldText: { color: DORADO.texto, fontSize: 17, fontWeight: '800' },
-  goldTextSm: { fontSize: 15 },
+  goldSm: { height: 40, borderRadius: 12, paddingHorizontal: 14 },
+  goldText: { color: DORADO.texto, fontSize: 15.5, fontWeight: '800', letterSpacing: -0.1 },
+  goldTextSm: { fontSize: 14 },
   outline: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 54,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    borderWidth: 2,
+    height: 50,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    borderWidth: 1,
   },
-  outlineText: { fontSize: 16.5, fontWeight: '800' },
+  outlineText: { fontSize: 15, fontWeight: '700' },
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 5,
-    borderRadius: 8,
+    borderRadius: 999,
     borderWidth: 1,
     paddingHorizontal: 9,
     paddingVertical: 4,
   },
-  pillText: { fontSize: 12, fontWeight: '800' },
+  pillText: { fontSize: 11.5, fontWeight: '700' },
   segment: {
     flexDirection: 'row',
     gap: 4,
@@ -220,8 +251,15 @@ const useStyles = makeStyles((colors) => ({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  segmentItem: { flex: 1, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  segmentOn: { backgroundColor: colors.accent },
+  segmentItem: {
+    flex: 1,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  segmentPill: { position: 'absolute', top: 4, bottom: 4, left: 4, borderRadius: 10, backgroundColor: colors.accent },
   segmentText: { color: colors.muted, fontSize: 13.5, fontWeight: '700' },
   segmentTextOn: { color: colors.accentForeground },
   empty: { alignItems: 'center', gap: 10, paddingVertical: 36, paddingHorizontal: 20 },

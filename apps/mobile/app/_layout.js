@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AgeGate from '../src/components/AgeGate';
 import BetSlipBar from '../src/components/BetSlipBar';
+import BottomNav from '../src/components/BottomNav';
 import HeaderActions, { HeaderLeft } from '../src/components/HeaderActions';
 import MainMenu from '../src/components/MainMenu';
 import { AuthProvider } from '../src/lib/auth-context';
@@ -19,6 +20,7 @@ export default function RootLayout() {
             <SafeAreaProvider>
               <ThemedStack />
               <BetSlipBar />
+              <BottomNav />
               <MainMenu />
               <AgeGate />
             </SafeAreaProvider>
@@ -42,7 +44,7 @@ function ThemedStack() {
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.foreground,
           headerShadowVisible: false,
-          headerTitleStyle: { fontWeight: '800' },
+          headerTitleStyle: { fontWeight: '700', fontSize: 17 },
           contentStyle: { backgroundColor: colors.background },
           animation: 'fade_from_bottom',
           // Menú a la izquierda (por ahí entra el panel); modo y boleto a la derecha.
@@ -52,8 +54,8 @@ function ThemedStack() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="partidos" options={{ title: 'Partidos' }} />
-        <Stack.Screen name="partido/[id]" options={{ title: '' }} />
-        <Stack.Screen name="boleto" options={{ title: 'Boleto' }} />
+        <Stack.Screen name="partido/[id]" options={{ title: '', animation: 'slide_from_right' }} />
+        <Stack.Screen name="boleto" options={{ title: 'Boleto', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="apuestas" options={{ title: 'Mis apuestas' }} />
         <Stack.Screen name="billetera" options={{ title: 'Billetera' }} />
         <Stack.Screen name="cuenta" options={{ title: 'Mi cuenta' }} />

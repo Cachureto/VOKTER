@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
-import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { FlatList, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ALTO_BARRA } from '../src/components/BetSlipBar';
+import FadeIn from '../src/components/FadeIn';
 import MatchCard from '../src/components/MatchCard';
+import { LiveDot, MatchCardSkeleton } from '../src/components/Motion';
+import Tap from '../src/components/Tap';
 import { EmptyState, ErrorNotice, Segmented } from '../src/components/ui';
 import { formatDate } from '../src/lib/format';
 import { MERCADOS, ORDEN_TARJETAS } from '../src/lib/markets';
@@ -43,7 +46,8 @@ export default function Partidos() {
   const qs = `status=${status}&market=${market}&limit=60${league ? `&league=${league}` : ''}`;
   const partidos = useFetch(`/matches?${qs}`, { every: status === 'live' ? 15000 : 60000 });
 
-  const cambiar = (cambios) => router.setParams({ league: league ? String(league) : undefined, status, market, ...cambios });
+  const cambiar = (cambios) =>
+    router.setParams({ league: league ? String(league) : undefined, status, market, ...cambios });
 
   // Con un mercado elegido solo se listan los partidos que lo tienen abierto
   // o ya liquidado (p. ej. "Clasifica" solo existe en eliminatorias).
@@ -66,7 +70,12 @@ export default function Partidos() {
 
   const cabecera = (
     <View style={styles.filters}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} style={styles.bleed}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chips}
+        style={styles.bleed}
+      >
         <Chip label="Todas" on={!league} onPress={() => cambiar({ league: undefined })} />
         {listaLigas.map((l) => (
           <Chip
@@ -79,7 +88,12 @@ export default function Partidos() {
         ))}
       </ScrollView>
       <Segmented options={ESTADOS} value={status} onChange={(v) => cambiar({ status: v })} />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} style={styles.bleed}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chips}
+        style={styles.bleed}
+      >
         {ORDEN_TARJETAS.map((t) => (
           <Chip key={t} small label={MERCADOS[t].short} on={market === t} onPress={() => cambiar({ market: t })} />
         ))}
@@ -94,13 +108,16 @@ export default function Partidos() {
       data={filas}
       keyExtractor={(f) => f.key}
       ListHeaderComponent={cabecera}
-      renderItem={({ item }) =>
+      renderItem={({ item, index }) =>
         item.tipo === 'dia' ? (
-          <Text style={[styles.day, item.texto === 'En vivo ahora' && { color: colors.danger }]}>{item.texto}</Text>
+          <FadeIn delay={Math.min(index, 8) * 45} distance={8} style={styles.dayRow}>
+            {item.texto === 'En vivo ahora' && <LiveDot />}
+            <Text style={[styles.day, item.texto === 'En vivo ahora' && { color: colors.danger }]}>{item.texto}</Text>
+          </FadeIn>
         ) : (
-          <View style={styles.item}>
+          <FadeIn delay={Math.min(index, 8) * 45} style={styles.item}>
             <MatchCard match={item.match} />
-          </View>
+          </FadeIn>
         )
       }
       ListEmptyComponent={
@@ -109,19 +126,34 @@ export default function Partidos() {
         ) : partidos.loading ? (
           <View style={{ gap: 16 }}>
             {[0, 1, 2].map((i) => (
-              <View key={i} style={styles.skeleton} />
+              <MatchCardSkeleton key={i} />
             ))}
           </View>
         ) : (
           <EmptyState
             icon={status === 'live' ? 'radio-outline' : 'calendar-outline'}
-            title={status === 'live' ? 'No hay partidos en vivo' : status === 'finished' ? 'Sin resultados todavía' : 'No hay partidos con este filtro'}
-            text={market !== '1x2' && status !== 'finished' ? `Prueba con otro mercado: «${MERCADOS[market].name}» no está abierto en estos partidos.` : 'Prueba con otra liga o vuelve más tarde.'}
+            title={
+              status === 'live'
+                ? 'No hay partidos en vivo'
+                : status === 'finished'
+                  ? 'Sin resultados todavía'
+                  : 'No hay partidos con este filtro'
+            }
+            text={
+              market !== '1x2' && status !== 'finished'
+                ? `Prueba con otro mercado: «${MERCADOS[market].name}» no está abierto en estos partidos.`
+                : 'Prueba con otra liga o vuelve más tarde.'
+            }
           />
         )
       }
       refreshControl={
-        <RefreshControl refreshing={partidos.refreshing} onRefresh={partidos.reload} tintColor={colors.accent} colors={[colors.accent]} />
+        <RefreshControl
+          refreshing={partidos.refreshing}
+          onRefresh={partidos.reload}
+          tintColor={colors.accent}
+          colors={[colors.accent]}
+        />
       }
     />
   );
@@ -130,9 +162,10 @@ export default function Partidos() {
 function Chip({ label, on, onPress, badge, small }) {
   const styles = useStyles();
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
-      style={({ pressed }) => [styles.chip, small && styles.chipSmall, on && styles.chipOn, pressed && { opacity: 0.8 }]}
+      scaleTo={0.92}
+      style={[styles.chip, small && styles.chipSmall, on && styles.chipOn]}
       accessibilityRole="button"
       accessibilityState={{ selected: on }}
     >
@@ -142,7 +175,7 @@ function Chip({ label, on, onPress, badge, small }) {
           <Text style={styles.badgeText}>{badge}</Text>
         </View>
       )}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -156,28 +189,34 @@ const useStyles = makeStyles((colors) => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    height: 40,
+    height: 38,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 999,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  chipSmall: { height: 34, paddingHorizontal: 12, borderRadius: 10 },
+  chipSmall: { height: 32, paddingHorizontal: 12 },
   chipOn: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
-  chipText: { color: colors.muted, fontSize: 14, fontWeight: '700' },
+  chipText: { color: colors.muted, fontSize: 13.5, fontWeight: '600' },
   chipTextOn: { color: colors.accent },
   badge: { borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1, backgroundColor: colors.danger },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '900' },
+  dayRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 18, marginBottom: 10 },
   day: {
     color: colors.muted,
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    marginTop: 18,
-    marginBottom: 10,
   },
-  item: { marginBottom: 14 },
-  skeleton: { height: 250, borderRadius: 26, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, opacity: 0.6 },
+  item: { marginBottom: 12 },
+  skeleton: {
+    height: 250,
+    borderRadius: 26,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    opacity: 0.6,
+  },
 }));

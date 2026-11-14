@@ -1,36 +1,69 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, Text, View } from 'react-native';
+import { Animated, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CURVAS, movimientoReducido } from '../lib/motion';
 import { makeStyles, useTheme } from '../theme';
 
 /**
  * Una sección del acordeón: cabecera con ícono, título y resumen, y un
  * contenido que se despliega animando su alto real.
  *
+ * Al abrir, el contenido baja unos píxeles mientras aparece (como si saliera
+ * de la cabecera), el ícono se rellena de dorado y la flecha gira. Al cerrar
+ * todo vuelve un poco más rápido, para que no se sienta pegajoso.
+ *
  * El contenido se mide en una capa absoluta (así su alto natural no depende
  * del contenedor que lo recorta) y el contenedor anima de 0 a esa medida.
  * Si el contenido cambia de tamaño estando abierto, la medida se actualiza.
+ *
+ * `variant="card"` lo pinta como tarjeta suelta (ficha del partido).
+ * `right` permite poner algo a la derecha de la cabecera (un contador).
  */
-export default function AccordionItem({ icon, title, summary, expanded, onToggle, active, children }) {
+export default function AccordionItem({
+  icon,
+  title,
+  summary,
+  expanded,
+  onToggle,
+  active,
+  right,
+  variant = 'menu',
+  children,
+}) {
   const styles = useStyles();
   const { colors } = useTheme();
   const [alto, setAlto] = useState(0);
   const t = useRef(new Animated.Value(expanded ? 1 : 0)).current;
+  const tarjeta = variant === 'card';
 
   useEffect(() => {
+    if (movimientoReducido()) {
+      t.setValue(expanded ? 1 : 0);
+      return;
+    }
     Animated.timing(t, {
       toValue: expanded ? 1 : 0,
-      duration: 300,
-      easing: Easing.bezier(0.22, 1, 0.36, 1),
+      duration: expanded ? 360 : 260,
+      easing: expanded ? CURVAS.entrar : CURVAS.salir,
       // El alto no se puede animar en el hilo nativo.
       useNativeDriver: false,
     }).start();
   }, [expanded, t]);
 
   const giro = t.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
+  const encendido = expanded || active;
 
   return (
-    <View style={[styles.item, expanded && styles.itemOpen]}>
+    <Animated.View
+      style={[
+        styles.item,
+        tarjeta && styles.card,
+        !tarjeta && {
+          borderColor: t.interpolate({ inputRange: [0, 1], outputRange: ['rgba(0,0,0,0)', colors.border] }),
+          backgroundColor: t.interpolate({ inputRange: [0, 1], outputRange: ['rgba(0,0,0,0)', colors.surface] }),
+        },
+      ]}
+    >
       <Pressable
         onPress={onToggle}
         style={({ pressed }) => [styles.head, pressed && styles.headPressed]}
@@ -38,16 +71,24 @@ export default function AccordionItem({ icon, title, summary, expanded, onToggle
         accessibilityState={{ expanded }}
         accessibilityLabel={`${title}. ${summary ?? ''}`}
       >
-        <View style={[styles.icon, (expanded || active) && styles.iconOn]}>
-          <Ionicons
-            name={icon}
-            size={18}
-            color={expanded || active ? colors.accentForeground : colors.accent}
-          />
-        </View>
+        {!!icon && (
+          <Animated.View
+            style={[
+              styles.icon,
+              {
+                backgroundColor: active
+                  ? colors.accent
+                  : t.interpolate({ inputRange: [0, 1], outputRange: [colors.accentSoft, colors.accent] }),
+                transform: [{ scale: t.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.08, 1] }) }],
+              },
+            ]}
+          >
+            <Ionicons name={icon} size={18} color={encendido ? colors.accentForeground : colors.accent} />
+          </Animated.View>
+        )}
         <View style={styles.texts}>
           <View style={styles.titleRow}>
-            <Text style={styles.title}>{title}</Text>
+            <Text style={[styles.title, tarjeta && styles.titleCard]}>{title}</Text>
             {active && <View style={styles.activeDot} />}
           </View>
           {!!summary && (
@@ -56,26 +97,33 @@ export default function AccordionItem({ icon, title, summary, expanded, onToggle
             </Text>
           )}
         </View>
-        <Animated.View style={{ transform: [{ rotate: giro }] }}>
-          <Ionicons name="chevron-down" size={18} color={colors.subtle} />
+        {right}
+        <Animated.View style={[styles.chevron, { transform: [{ rotate: giro }] }]}>
+          <Ionicons name="chevron-down" size={18} color={expanded ? colors.accent : colors.subtle} />
         </Animated.View>
       </Pressable>
 
       <Animated.View
-        style={{
-          height: t.interpolate({ inputRange: [0, 1], outputRange: [0, alto] }),
-          opacity: t,
-          overflow: 'hidden',
-        }}
+        style={{ height: t.interpolate({ inputRange: [0, 1], outputRange: [0, alto] }), overflow: 'hidden' }}
         importantForAccessibility={expanded ? 'auto' : 'no-hide-descendants'}
         accessibilityElementsHidden={!expanded}
         pointerEvents={expanded ? 'auto' : 'none'}
       >
-        <View style={styles.measure} onLayout={(e) => setAlto(e.nativeEvent.layout.height)}>
+        <Animated.View
+          style={[
+            styles.measure,
+            tarjeta && styles.measureCard,
+            {
+              opacity: t.interpolate({ inputRange: [0, 0.35, 1], outputRange: [0, 0.2, 1] }),
+              transform: [{ translateY: t.interpolate({ inputRange: [0, 1], outputRange: [-10, 0] }) }],
+            },
+          ]}
+          onLayout={(e) => setAlto(e.nativeEvent.layout.height)}
+        >
           {children}
-        </View>
+        </Animated.View>
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -85,7 +133,7 @@ const useStyles = makeStyles((colors) => ({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  itemOpen: { borderColor: colors.border, backgroundColor: colors.surface },
+  card: { borderRadius: 22, borderColor: colors.border, backgroundColor: colors.surface },
   head: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -101,13 +149,20 @@ const useStyles = makeStyles((colors) => ({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.accentSoft,
   },
-  iconOn: { backgroundColor: colors.accent },
   texts: { flex: 1, minWidth: 0 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   title: { color: colors.foreground, fontSize: 15.5, fontWeight: '700', letterSpacing: -0.2 },
+  titleCard: { fontSize: 17, fontWeight: '900' },
   activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent },
   summary: { color: colors.muted, fontSize: 12.5, marginTop: 2 },
+  chevron: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   measure: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 12, paddingBottom: 14 },
+  measureCard: { paddingHorizontal: 16, paddingBottom: 16 },
 }));

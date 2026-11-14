@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "9cab1c7e-e592-4629-a7dd-2977efaad026"
+      }
+    },
+    "android": {
+      "package": "com.vokter.vokter"
+    }
+  }
+}

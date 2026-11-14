@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ALTO_BARRA } from '../src/components/BetSlipBar';
+import FadeIn from '../src/components/FadeIn';
+import { Skeleton } from '../src/components/Motion';
 import { EmptyState, ErrorNotice, GoldButton, LoginRequired, Pill, Segmented } from '../src/components/ui';
 import { useAuth } from '../src/lib/auth-context';
 import { codigoBoleto, formatCOP, formatDateTime, formatOdds } from '../src/lib/format';
@@ -61,19 +63,28 @@ export default function Apuestas() {
       data={items}
       keyExtractor={(b) => String(b.id)}
       ListHeaderComponent={<Segmented options={PESTANAS} value={tab} onChange={setTab} style={{ marginBottom: 14 }} />}
-      renderItem={({ item }) => <Boleto bet={item} onMatch={(id) => router.push(`/partido/${id}`)} />}
+      renderItem={({ item, index }) => (
+        <FadeIn delay={Math.min(index, 6) * 60}>
+          <Boleto bet={item} onMatch={(id) => router.push(`/partido/${id}`)} />
+        </FadeIn>
+      )}
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
       ListEmptyComponent={
         error ? (
           <ErrorNotice message={error.message} onRetry={reload} />
         ) : loading ? (
-          <View style={styles.skeleton} />
+          <View style={{ gap: 12 }}>
+            <Skeleton height={200} radius={22} />
+            <Skeleton height={200} radius={22} />
+          </View>
         ) : (
           <EmptyState
             icon="receipt-outline"
             title={tab === 'open' ? 'No tienes apuestas abiertas' : 'Todavía no hay historial'}
             text="Elige un partido, toca una cuota y confirma tu boleto."
-            action={<GoldButton label="Ver partidos" onPress={() => router.push('/partidos')} style={{ marginTop: 8 }} />}
+            action={
+              <GoldButton label="Ver partidos" onPress={() => router.push('/partidos')} style={{ marginTop: 8 }} />
+            }
           />
         )
       }

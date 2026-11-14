@@ -1,9 +1,21 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FadeIn from '../src/components/FadeIn';
+import { SuccessCheck, useCountUp } from '../src/components/Motion';
+import Tap from '../src/components/Tap';
+import { movimientoReducido } from '../src/lib/motion';
 import { EmptyState, GoldButton, OutlineButton, Pill } from '../src/components/ui';
 import { apiFetch } from '../src/lib/api';
 import { useAuth } from '../src/lib/auth-context';
@@ -29,6 +41,15 @@ export default function Boleto() {
   const [hecha, setHecha] = useState(null);
 
   const valor = Number(slip.stake) || 0;
+  const ganancia = useCountUp(slip.potentialPayout);
+  const cuota = useCountUp(slip.totalOdds);
+  // Quitar una selección (o vaciar el boleto) reacomoda la lista con suavidad.
+  const conTransicion = (fn) => {
+    if (!movimientoReducido()) {
+      LayoutAnimation.configureNext(LayoutAnimation.create(240, 'easeInEaseOut', 'opacity'));
+    }
+    fn();
+  };
   const saldo = wallet?.balanceCop ?? 0;
   const empezados = slip.selections.filter((s) => new Date(s.kickoffAt).getTime() - 60000 <= Date.now());
   const fueraDeRango = valor < MIN || valor > MAX;
@@ -69,9 +90,7 @@ export default function Boleto() {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <FadeIn style={styles.done}>
-          <View style={styles.doneIcon}>
-            <Ionicons name="checkmark" size={36} color={colors.accentForeground} />
-          </View>
+          <SuccessCheck />
           <Text style={styles.doneTitle}>¡Apuesta registrada!</Text>
           <Text style={styles.doneText}>
             Boleto {codigoBoleto(hecha.id)} · {hecha.type === 'combo' ? `Combinada de ${hecha.legs.length}` : 'Simple'}
@@ -81,7 +100,11 @@ export default function Boleto() {
             <Linea k="Cuota" v={formatOdds(hecha.totalOdds)} />
             <Linea k="Ganancia posible" v={formatCOP(hecha.potentialPayoutCop)} fuerte />
           </View>
-          <GoldButton label="Ver mis apuestas" onPress={() => router.replace({ pathname: '/apuestas', params: { status: 'open' } })} style={styles.full} />
+          <GoldButton
+            label="Ver mis apuestas"
+            onPress={() => router.replace({ pathname: '/apuestas', params: { status: 'open' } })}
+            style={styles.full}
+          />
           <OutlineButton label="Seguir apostando" onPress={() => router.replace('/partidos')} style={styles.full} />
         </FadeIn>
       </ScrollView>
@@ -95,7 +118,9 @@ export default function Boleto() {
           icon="receipt-outline"
           title="Tu boleto está vacío"
           text="Toca una cuota en cualquier partido para agregarla. Con varias selecciones de partidos distintos armas una combinada."
-          action={<GoldButton label="Ver partidos" onPress={() => router.replace('/partidos')} style={{ marginTop: 8 }} />}
+          action={
+            <GoldButton label="Ver partidos" onPress={() => router.replace('/partidos')} style={{ marginTop: 8 }} />
+          }
         />
       </View>
     );
@@ -103,7 +128,13 @@ export default function Boleto() {
 
   let boton;
   if (!user) {
-    boton = <GoldButton label="Inicia sesión para apostar" icon="log-in-outline" onPress={() => router.push({ pathname: '/login', params: { next: '/boleto' } })} />;
+    boton = (
+      <GoldButton
+        label="Inicia sesión para apostar"
+        icon="log-in-outline"
+        onPress={() => router.push({ pathname: '/login', params: { next: '/boleto' } })}
+      />
+    );
   } else if (selfExcluded) {
     boton = <GoldButton label="Cuenta en pausa (autoexclusión)" disabled />;
   } else if (valor > saldo) {
@@ -127,10 +158,13 @@ export default function Boleto() {
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.head}>
           <Pill label={slip.count === 1 ? 'Apuesta simple' : `Combinada · ${slip.count} selecciones`} />
-          <Pressable onPress={slip.clear} hitSlop={8}>
+          <Pressable onPress={() => conTransicion(slip.clear)} hitSlop={8}>
             <Text style={styles.clear}>Vaciar</Text>
           </Pressable>
         </View>
@@ -138,25 +172,32 @@ export default function Boleto() {
         {cambiaron && (
           <View style={[styles.banner, styles.bannerWarn]}>
             <Ionicons name="swap-vertical" size={18} color={colors.warning} />
-            <Text style={styles.bannerText}>Algunas cuotas cambiaron. Revisa los valores nuevos antes de confirmar.</Text>
+            <Text style={styles.bannerText}>
+              Algunas cuotas cambiaron. Revisa los valores nuevos antes de confirmar.
+            </Text>
           </View>
         )}
         {empezados.length > 0 && (
           <View style={[styles.banner, styles.bannerDanger]}>
             <Ionicons name="time-outline" size={18} color={colors.danger} />
             <Text style={styles.bannerText}>
-              {empezados.length === 1 ? 'Un partido ya empezó' : `${empezados.length} partidos ya empezaron`}. Quita esas selecciones para continuar.
+              {empezados.length === 1 ? 'Un partido ya empezó' : `${empezados.length} partidos ya empezaron`}. Quita
+              esas selecciones para continuar.
             </Text>
           </View>
         )}
 
         {/* ---------- Selecciones ---------- */}
         <View style={styles.legs}>
-          {slip.selections.map((s) => {
+          {slip.selections.map((s, i) => {
             const empezo = empezados.includes(s);
             const sube = s.previousOdds && s.odds > s.previousOdds;
             return (
-              <View key={s.selectionId} style={[styles.leg, empezo && { borderColor: colors.dangerLine }]}>
+              <FadeIn
+                key={s.selectionId}
+                delay={Math.min(i, 5) * 50}
+                style={[styles.leg, empezo && { borderColor: colors.dangerLine }]}
+              >
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={styles.legMarket}>{s.marketName}</Text>
                   <Text style={styles.legLabel} numberOfLines={1}>
@@ -172,17 +213,25 @@ export default function Boleto() {
                   </Text>
                 </View>
                 <View style={styles.legRight}>
-                  <Pressable onPress={() => slip.remove(s.selectionId)} hitSlop={10} accessibilityLabel="Quitar selección">
+                  <Pressable
+                    onPress={() => conTransicion(() => slip.remove(s.selectionId))}
+                    hitSlop={10}
+                    accessibilityLabel="Quitar selección"
+                  >
                     <Ionicons name="close-circle" size={22} color={colors.subtle} />
                   </Pressable>
                   <View style={styles.oddsBox}>
                     {s.previousOdds && s.previousOdds !== s.odds && (
-                      <Ionicons name={sube ? 'arrow-up' : 'arrow-down'} size={13} color={sube ? colors.live : colors.danger} />
+                      <Ionicons
+                        name={sube ? 'arrow-up' : 'arrow-down'}
+                        size={13}
+                        color={sube ? colors.live : colors.danger}
+                      />
                     )}
                     <Text style={styles.legOdds}>{formatOdds(s.odds)}</Text>
                   </View>
                 </View>
-              </View>
+              </FadeIn>
             );
           })}
         </View>
@@ -213,19 +262,20 @@ export default function Boleto() {
           )}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quick}>
             {RAPIDOS.map((r) => (
-              <Pressable
+              <Tap
                 key={r}
+                scaleTo={0.9}
                 onPress={() => slip.setStake(String(r))}
-                style={({ pressed }) => [styles.quickChip, valor === r && styles.quickOn, pressed && { opacity: 0.8 }]}
+                style={[styles.quickChip, valor === r && styles.quickOn]}
               >
                 <Text style={[styles.quickText, valor === r && styles.quickTextOn]}>{formatCOP(r)}</Text>
-              </Pressable>
+              </Tap>
             ))}
           </ScrollView>
 
           <View style={styles.summary}>
-            <Linea k="Cuota total" v={formatOdds(slip.totalOdds)} />
-            <Linea k="Ganancia posible" v={formatCOP(slip.potentialPayout)} fuerte />
+            <Linea k="Cuota total" v={formatOdds(cuota)} />
+            <Linea k="Ganancia posible" v={formatCOP(Math.round(ganancia))} fuerte />
           </View>
         </View>
 
@@ -238,8 +288,8 @@ export default function Boleto() {
 
         {boton}
         <Text style={styles.fine}>
-          Las cuotas pueden cambiar hasta que confirmes. Las apuestas se cierran un minuto antes del inicio y se liquidan con el
-          resultado de los 90 minutos. Juega con responsabilidad.
+          Las cuotas pueden cambiar hasta que confirmes. Las apuestas se cierran un minuto antes del inicio y se
+          liquidan con el resultado de los 90 minutos. Juega con responsabilidad.
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -299,15 +349,35 @@ const useStyles = makeStyles((colors) => ({
     backgroundColor: colors.background,
   },
   currency: { color: colors.accent, fontSize: 24, fontWeight: '900' },
-  input: { flex: 1, color: colors.foreground, fontSize: 26, fontWeight: '900', fontVariant: ['tabular-nums'], paddingVertical: 0 },
+  input: {
+    flex: 1,
+    color: colors.foreground,
+    fontSize: 26,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+    paddingVertical: 0,
+  },
   cop: { color: colors.subtle, fontSize: 13, fontWeight: '700' },
   rangeError: { color: colors.danger, fontSize: 12.5, marginTop: 6 },
   quick: { gap: 8, marginTop: 12 },
-  quickChip: { height: 36, paddingHorizontal: 12, borderRadius: 10, justifyContent: 'center', backgroundColor: colors.surface2 },
+  quickChip: {
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    justifyContent: 'center',
+    backgroundColor: colors.surface2,
+  },
   quickOn: { backgroundColor: colors.accentSoft, borderWidth: 1, borderColor: colors.accent },
   quickText: { color: colors.muted, fontSize: 13.5, fontWeight: '700' },
   quickTextOn: { color: colors.accent },
-  summary: { gap: 8, marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: colors.border, alignSelf: 'stretch' },
+  summary: {
+    gap: 8,
+    marginTop: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    alignSelf: 'stretch',
+  },
   lineRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   lineK: { color: colors.muted, fontSize: 14 },
   lineV: { color: colors.foreground, fontSize: 15, fontWeight: '800', fontVariant: ['tabular-nums'] },
@@ -322,7 +392,14 @@ const useStyles = makeStyles((colors) => ({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  doneIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent },
+  doneIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accent,
+  },
   doneTitle: { color: colors.foreground, fontSize: 24, fontWeight: '900', marginTop: 6 },
   doneText: { color: colors.muted, fontSize: 14 },
   full: { alignSelf: 'stretch', marginTop: 6 },

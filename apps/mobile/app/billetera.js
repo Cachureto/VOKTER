@@ -1,9 +1,21 @@
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Linking, Platform, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ALTO_NAV } from '../src/lib/layout';
 import AmountInput from '../src/components/AmountInput';
+import FadeIn from '../src/components/FadeIn';
+import { Pop, useCountUp } from '../src/components/Motion';
 import { EmptyState, GoldButton, LoginRequired, OutlineButton, Pill, Segmented } from '../src/components/ui';
 import { apiFetch } from '../src/lib/api';
 import { useAuth } from '../src/lib/auth-context';
@@ -46,6 +58,7 @@ export default function Billetera() {
   const [enviando, setEnviando] = useState(false);
   const [aviso, setAviso] = useState(null); // { tipo: 'ok' | 'error', texto }
   const [refrescando, setRefrescando] = useState(false);
+  const saldoAnimado = useCountUp(wallet?.balanceCop ?? 0);
 
   useEffect(() => {
     if (params.tab && PESTANAS.some((p) => p.value === params.tab)) setTab(params.tab);
@@ -107,14 +120,19 @@ export default function Billetera() {
     }
   };
 
-  const errDep = monto && (monto < DEP.min || monto > DEP.max) ? `Entre ${formatCOP(DEP.min)} y ${formatCOP(DEP.max)}.` : null;
+  const errDep =
+    monto && (monto < DEP.min || monto > DEP.max) ? `Entre ${formatCOP(DEP.min)} y ${formatCOP(DEP.max)}.` : null;
   const errRet =
-    monto > saldo ? 'No puedes retirar más de tu saldo disponible.' : monto && (monto < RET.min || monto > RET.max) ? `Entre ${formatCOP(RET.min)} y ${formatCOP(RET.max)}.` : null;
+    monto > saldo
+      ? 'No puedes retirar más de tu saldo disponible.'
+      : monto && (monto < RET.min || monto > RET.max)
+        ? `Entre ${formatCOP(RET.min)} y ${formatCOP(RET.max)}.`
+        : null;
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + ALTO_NAV + 32 }]}
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
@@ -135,9 +153,12 @@ export default function Billetera() {
             <Text style={styles.balanceLabel}>Saldo disponible</Text>
             {pruebas && <Pill label="Modo pruebas" tone="warning" icon="flask-outline" />}
           </View>
-          <Text style={styles.balance}>{formatCOP(saldo)}</Text>
+          <Pop trigger={wallet?.balanceCop} scale={1.06} style={{ alignSelf: 'flex-start' }}>
+            <Text style={styles.balance}>{formatCOP(Math.round(saldoAnimado))}</Text>
+          </Pop>
           <Text style={styles.inPlay}>
-            En juego: {formatCOP(wallet?.inPlayCop ?? 0)} · {wallet?.openBets ?? 0} apuesta{wallet?.openBets === 1 ? '' : 's'} abierta{wallet?.openBets === 1 ? '' : 's'}
+            En juego: {formatCOP(wallet?.inPlayCop ?? 0)} · {wallet?.openBets ?? 0} apuesta
+            {wallet?.openBets === 1 ? '' : 's'} abierta{wallet?.openBets === 1 ? '' : 's'}
           </Text>
           {pruebas && (
             <Text style={styles.testNote}>
@@ -159,110 +180,161 @@ export default function Billetera() {
           </View>
         )}
 
-        {/* ---------- Depositar ---------- */}
-        {tab === 'depositar' &&
-          (selfExcluded ? (
-            <EmptyState icon="pause-circle-outline" title="Cuenta en pausa" text="Durante la autoexclusión no se pueden hacer depósitos. Sí puedes retirar tu saldo." />
-          ) : (
-            <View style={styles.card}>
-              <AmountInput label="¿Cuánto quieres depositar?" value={monto} onChange={setMonto} quick={[20000, 50000, 100000, 200000, 500000]} error={errDep} />
-              <Text style={[styles.label, { marginTop: 18 }]}>Medio de pago</Text>
-              <View style={styles.methods}>
-                {METODOS.map((m) => {
-                  const on = metodo === m.value;
+        <FadeIn key={tab} distance={10} style={{ gap: 14 }}>
+          {/* ---------- Depositar ---------- */}
+          {tab === 'depositar' &&
+            (selfExcluded ? (
+              <EmptyState
+                icon="pause-circle-outline"
+                title="Cuenta en pausa"
+                text="Durante la autoexclusión no se pueden hacer depósitos. Sí puedes retirar tu saldo."
+              />
+            ) : (
+              <View style={styles.card}>
+                <AmountInput
+                  label="¿Cuánto quieres depositar?"
+                  value={monto}
+                  onChange={setMonto}
+                  quick={[20000, 50000, 100000, 200000, 500000]}
+                  error={errDep}
+                />
+                <Text style={[styles.label, { marginTop: 18 }]}>Medio de pago</Text>
+                <View style={styles.methods}>
+                  {METODOS.map((m) => {
+                    const on = metodo === m.value;
+                    return (
+                      <Pressable
+                        key={m.value}
+                        onPress={() => setMetodo(m.value)}
+                        style={[styles.method, on && styles.methodOn]}
+                        accessibilityState={{ selected: on }}
+                      >
+                        <Ionicons name={m.icon} size={20} color={on ? colors.accent : colors.muted} />
+                        <Text style={[styles.methodText, on && { color: colors.accent }]}>{m.label}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <GoldButton
+                  label={`Depositar ${formatCOP(monto)}`}
+                  loading={enviando}
+                  disabled={!monto || !!errDep}
+                  onPress={() =>
+                    enviar(
+                      '/wallet/deposits',
+                      { amountCop: monto, method: metodo },
+                      (r) => `Depósito acreditado. Nuevo saldo: ${formatCOP(r.balanceCop)}.`,
+                    )
+                  }
+                  style={{ marginTop: 20 }}
+                />
+                <Pressable onPress={() => router.push('/juego-responsable')} hitSlop={6}>
+                  <Text style={styles.link}>Poner un límite a mis depósitos</Text>
+                </Pressable>
+              </View>
+            ))}
+
+          {/* ---------- Retirar ---------- */}
+          {tab === 'retirar' &&
+            (!verificado ? (
+              <View style={styles.card}>
+                <View style={styles.kycIcon}>
+                  <Ionicons name="id-card-outline" size={28} color={colors.accent} />
+                </View>
+                <Text style={styles.cardTitle}>Verifica tu identidad</Text>
+                <Text style={styles.cardText}>
+                  Por ley, antes del primer retiro confirmamos que la cuenta es tuya ({user?.documentType}{' '}
+                  {user?.documentMasked}). El dinero solo se envía a cuentas a tu nombre.
+                </Text>
+                {pruebas ? (
+                  <GoldButton
+                    label="Verificar (modo pruebas)"
+                    loading={enviando}
+                    onPress={verificar}
+                    style={{ marginTop: 16 }}
+                  />
+                ) : (
+                  <Text style={styles.cardText}>La verificación con documento estará disponible pronto.</Text>
+                )}
+              </View>
+            ) : (
+              <View style={styles.card}>
+                <AmountInput
+                  label="¿Cuánto quieres retirar?"
+                  value={monto}
+                  onChange={setMonto}
+                  quick={[20000, 50000, 100000, 200000].filter((q) => q <= saldo)}
+                  error={errRet}
+                />
+                <Pressable onPress={() => setMonto(saldo)} hitSlop={6}>
+                  <Text style={styles.link}>Retirar todo ({formatCOP(saldo)})</Text>
+                </Pressable>
+                <GoldButton
+                  label={`Retirar ${formatCOP(monto)}`}
+                  loading={enviando}
+                  disabled={!monto || !!errRet}
+                  onPress={() =>
+                    enviar(
+                      '/wallet/withdrawals',
+                      { amountCop: monto },
+                      (r) => `Retiro enviado. Nuevo saldo: ${formatCOP(r.balanceCop)}.`,
+                    )
+                  }
+                  style={{ marginTop: 16 }}
+                />
+                <Text style={styles.fine}>
+                  Los retiros llegan a la cuenta bancaria registrada a tu nombre en 1 a 3 días hábiles.
+                </Text>
+              </View>
+            ))}
+
+          {/* ---------- Movimientos ---------- */}
+          {tab === 'movimientos' &&
+            (wallet?.transactions?.length ? (
+              <View style={styles.card}>
+                {wallet.transactions.map((t, i) => {
+                  const info = TIPOS[t.type] ?? TIPOS.adjustment;
                   return (
-                    <Pressable key={m.value} onPress={() => setMetodo(m.value)} style={[styles.method, on && styles.methodOn]} accessibilityState={{ selected: on }}>
-                      <Ionicons name={m.icon} size={20} color={on ? colors.accent : colors.muted} />
-                      <Text style={[styles.methodText, on && { color: colors.accent }]}>{m.label}</Text>
-                    </Pressable>
+                    <View key={t.id} style={[styles.tx, i > 0 && styles.txBorder]}>
+                      <Ionicons name={info.icon} size={26} color={colors[info.tono]} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.txTitle}>
+                          {info.label}
+                          {t.betId ? ` · boleto ${codigoBoleto(t.betId)}` : ''}
+                          {t.method ? ` · ${t.method.toUpperCase()}` : ''}
+                        </Text>
+                        <Text style={styles.txDate}>
+                          {formatDateTime(t.createdAt)}
+                          {t.status !== 'completed' ? ` · ${t.status === 'pending' ? 'pendiente' : 'fallido'}` : ''}
+                        </Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={[styles.txAmount, info.signo > 0 && { color: colors.live }]}>
+                          {info.signo > 0 ? '+' : '−'}
+                          {formatCOP(t.amountCop)}
+                        </Text>
+                        {t.balanceAfterCop != null && <Text style={styles.txDate}>{formatCOP(t.balanceAfterCop)}</Text>}
+                      </View>
+                    </View>
                   );
                 })}
               </View>
-              <GoldButton
-                label={`Depositar ${formatCOP(monto)}`}
-                loading={enviando}
-                disabled={!monto || !!errDep}
-                onPress={() => enviar('/wallet/deposits', { amountCop: monto, method: metodo }, (r) => `Depósito acreditado. Nuevo saldo: ${formatCOP(r.balanceCop)}.`)}
-                style={{ marginTop: 20 }}
+            ) : (
+              <EmptyState
+                icon="swap-vertical-outline"
+                title="Sin movimientos"
+                text="Aquí verás tus depósitos, apuestas, premios y retiros."
               />
-              <Pressable onPress={() => router.push('/juego-responsable')} hitSlop={6}>
-                <Text style={styles.link}>Poner un límite a mis depósitos</Text>
-              </Pressable>
-            </View>
-          ))}
-
-        {/* ---------- Retirar ---------- */}
-        {tab === 'retirar' &&
-          (!verificado ? (
-            <View style={styles.card}>
-              <View style={styles.kycIcon}>
-                <Ionicons name="id-card-outline" size={28} color={colors.accent} />
-              </View>
-              <Text style={styles.cardTitle}>Verifica tu identidad</Text>
-              <Text style={styles.cardText}>
-                Por ley, antes del primer retiro confirmamos que la cuenta es tuya ({user?.documentType} {user?.documentMasked}). El dinero
-                solo se envía a cuentas a tu nombre.
-              </Text>
-              {pruebas ? (
-                <GoldButton label="Verificar (modo pruebas)" loading={enviando} onPress={verificar} style={{ marginTop: 16 }} />
-              ) : (
-                <Text style={styles.cardText}>La verificación con documento estará disponible pronto.</Text>
-              )}
-            </View>
-          ) : (
-            <View style={styles.card}>
-              <AmountInput label="¿Cuánto quieres retirar?" value={monto} onChange={setMonto} quick={[20000, 50000, 100000, 200000].filter((q) => q <= saldo)} error={errRet} />
-              <Pressable onPress={() => setMonto(saldo)} hitSlop={6}>
-                <Text style={styles.link}>Retirar todo ({formatCOP(saldo)})</Text>
-              </Pressable>
-              <GoldButton
-                label={`Retirar ${formatCOP(monto)}`}
-                loading={enviando}
-                disabled={!monto || !!errRet}
-                onPress={() => enviar('/wallet/withdrawals', { amountCop: monto }, (r) => `Retiro enviado. Nuevo saldo: ${formatCOP(r.balanceCop)}.`)}
-                style={{ marginTop: 16 }}
-              />
-              <Text style={styles.fine}>Los retiros llegan a la cuenta bancaria registrada a tu nombre en 1 a 3 días hábiles.</Text>
-            </View>
-          ))}
-
-        {/* ---------- Movimientos ---------- */}
-        {tab === 'movimientos' &&
-          (wallet?.transactions?.length ? (
-            <View style={styles.card}>
-              {wallet.transactions.map((t, i) => {
-                const info = TIPOS[t.type] ?? TIPOS.adjustment;
-                return (
-                  <View key={t.id} style={[styles.tx, i > 0 && styles.txBorder]}>
-                    <Ionicons name={info.icon} size={26} color={colors[info.tono]} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.txTitle}>
-                        {info.label}
-                        {t.betId ? ` · boleto ${codigoBoleto(t.betId)}` : ''}
-                        {t.method ? ` · ${t.method.toUpperCase()}` : ''}
-                      </Text>
-                      <Text style={styles.txDate}>
-                        {formatDateTime(t.createdAt)}
-                        {t.status !== 'completed' ? ` · ${t.status === 'pending' ? 'pendiente' : 'fallido'}` : ''}
-                      </Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={[styles.txAmount, info.signo > 0 && { color: colors.live }]}>
-                        {info.signo > 0 ? '+' : '−'}
-                        {formatCOP(t.amountCop)}
-                      </Text>
-                      {t.balanceAfterCop != null && <Text style={styles.txDate}>{formatCOP(t.balanceAfterCop)}</Text>}
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          ) : (
-            <EmptyState icon="swap-vertical-outline" title="Sin movimientos" text="Aquí verás tus depósitos, apuestas, premios y retiros." />
-          ))}
+            ))}
+        </FadeIn>
 
         {tab !== 'movimientos' && (
-          <OutlineButton label="Ver mis apuestas" tone="neutral" icon="receipt-outline" onPress={() => router.push('/apuestas')} />
+          <OutlineButton
+            label="Ver mis apuestas"
+            tone="neutral"
+            icon="receipt-outline"
+            onPress={() => router.push('/apuestas')}
+          />
         )}
       </ScrollView>
     </KeyboardAvoidingView>
@@ -273,10 +345,23 @@ const useStyles = makeStyles((colors) => ({
   screen: { flex: 1, backgroundColor: colors.background },
   pad: { padding: 20 },
   content: { padding: 20, paddingTop: 4, gap: 14, width: '100%', maxWidth: 640, alignSelf: 'center' },
-  balanceCard: { padding: 20, borderRadius: 26, borderWidth: 1, borderColor: colors.accentLine, backgroundColor: colors.accentSoft },
+  balanceCard: {
+    padding: 20,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: colors.accentLine,
+    backgroundColor: colors.accentSoft,
+  },
   balanceTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   balanceLabel: { color: colors.muted, fontSize: 13.5, fontWeight: '700' },
-  balance: { color: colors.foreground, fontSize: 38, fontWeight: '900', letterSpacing: -1, marginTop: 4, fontVariant: ['tabular-nums'] },
+  balance: {
+    color: colors.foreground,
+    fontSize: 38,
+    fontWeight: '900',
+    letterSpacing: -1,
+    marginTop: 4,
+    fontVariant: ['tabular-nums'],
+  },
   inPlay: { color: colors.muted, fontSize: 13.5, marginTop: 4 },
   testNote: { color: colors.muted, fontSize: 12.5, lineHeight: 18, marginTop: 12 },
   banner: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 13, borderRadius: 14, borderWidth: 1 },
@@ -286,7 +371,14 @@ const useStyles = makeStyles((colors) => ({
   card: { padding: 18, borderRadius: 22, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
   cardTitle: { color: colors.foreground, fontSize: 18, fontWeight: '900', marginTop: 12 },
   cardText: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 6 },
-  kycIcon: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accentSoft },
+  kycIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentSoft,
+  },
   label: { color: colors.muted, fontSize: 13, fontWeight: '700', marginBottom: 8 },
   methods: { flexDirection: 'row', gap: 10 },
   method: {

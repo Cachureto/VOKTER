@@ -2,6 +2,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ALTO_NAV } from '../src/lib/layout';
 import { LoginRequired, OutlineButton, Pill } from '../src/components/ui';
 import { useAuth } from '../src/lib/auth-context';
 import { formatCOP, formatDate } from '../src/lib/format';
@@ -31,7 +32,10 @@ export default function Cuenta() {
     .join('');
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + ALTO_NAV + 32 }]}
+    >
       <View style={styles.head}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{iniciales}</Text>
@@ -63,9 +67,23 @@ export default function Cuenta() {
       </View>
 
       <View style={styles.card}>
-        <Fila icon="wallet-outline" label="Billetera" meta={formatCOP(wallet?.balanceCop ?? 0)} onPress={() => router.push('/billetera')} />
-        <Fila icon="receipt-outline" label="Mis apuestas" meta={wallet?.openBets ? `${wallet.openBets} abiertas` : undefined} onPress={() => router.push('/apuestas')} />
-        <Fila icon="shield-checkmark-outline" label="Juego responsable" onPress={() => router.push('/juego-responsable')} />
+        <Fila
+          icon="wallet-outline"
+          label="Billetera"
+          meta={formatCOP(wallet?.balanceCop ?? 0)}
+          onPress={() => router.push('/billetera')}
+        />
+        <Fila
+          icon="receipt-outline"
+          label="Mis apuestas"
+          meta={wallet?.openBets ? `${wallet.openBets} abiertas` : undefined}
+          onPress={() => router.push('/apuestas')}
+        />
+        <Fila
+          icon="shield-checkmark-outline"
+          label="Juego responsable"
+          onPress={() => router.push('/juego-responsable')}
+        />
         <Fila icon="document-text-outline" label="Términos y condiciones" onPress={() => router.push('/terminos')} />
         <Fila icon="settings-outline" label="Ajustes de la app" onPress={() => router.push('/ajustes')} last />
       </View>
@@ -80,7 +98,8 @@ export default function Cuenta() {
         }}
       />
       <Text style={styles.fine}>
-        Para cambiar tu nombre, documento o fecha de nacimiento escribe a soporte: son datos verificados y no se editan desde la app.
+        Para cambiar tu nombre, documento o fecha de nacimiento escribe a soporte: son datos verificados y no se editan
+        desde la app.
       </Text>
     </ScrollView>
   );
@@ -96,7 +115,10 @@ export default function Cuenta() {
 
   function Fila({ icon, label, meta, onPress, last }) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.row, !last && styles.rowBorder, pressed && { opacity: 0.7 }]}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [styles.row, !last && styles.rowBorder, pressed && { opacity: 0.7 }]}
+      >
         <Ionicons name={icon} size={20} color={colors.accent} />
         <Text style={styles.rowLabel}>{label}</Text>
         {!!meta && <Text style={styles.rowMeta}>{meta}</Text>}
@@ -111,12 +133,26 @@ const useStyles = makeStyles((colors) => ({
   pad: { padding: 20 },
   content: { padding: 20, paddingTop: 4, gap: 14, width: '100%', maxWidth: 640, alignSelf: 'center' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  avatar: { width: 68, height: 68, borderRadius: 34, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent },
+  avatar: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accent,
+  },
   avatarText: { color: colors.accentForeground, fontSize: 24, fontWeight: '900' },
   name: { color: colors.foreground, fontSize: 21, fontWeight: '900' },
   email: { color: colors.muted, fontSize: 14, marginTop: 2 },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
-  card: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 22, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+  card: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
   dato: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 11 },
   datoK: { color: colors.muted, fontSize: 14 },
   datoV: { color: colors.foreground, fontSize: 14, fontWeight: '700', flexShrink: 1, textAlign: 'right' },

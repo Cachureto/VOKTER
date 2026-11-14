@@ -1,7 +1,8 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { MERCADOS } from '../lib/markets';
 import { makeStyles, useTheme } from '../theme';
+import Tap from './Tap';
 
 /** Tarjeta de "Mercados Populares": ícono en cuadro dorado, nombre y pista. */
 export default function MarketTile({ type, onPress, width }) {
@@ -9,20 +10,25 @@ export default function MarketTile({ type, onPress, width }) {
   const { colors } = useTheme();
   const m = MERCADOS[type];
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
-      style={({ pressed }) => [styles.tile, { width }, pressed && { opacity: 0.85 }]}
+      scaleTo={0.95}
+      style={({ pressed }) => [styles.tile, { width }, pressed && styles.tilePressed]}
       accessibilityRole="button"
       accessibilityLabel={m.name}
     >
       <View style={styles.icon}>
-        <Ionicons name={m.icon} size={24} color={colors.accent} />
+        <Ionicons name={m.icon} size={20} color={colors.accent} />
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={styles.name}>{m.name}</Text>
-        <Text style={styles.hint}>{m.hint}</Text>
+        <Text style={styles.name} numberOfLines={2}>
+          {m.name}
+        </Text>
+        <Text style={styles.hint} numberOfLines={2}>
+          {m.hint}
+        </Text>
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -30,22 +36,24 @@ const useStyles = makeStyles((colors) => ({
   tile: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    minHeight: 104,
-    padding: 16,
-    borderRadius: 22,
+    gap: 12,
+    minHeight: 76,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
+  tilePressed: { borderColor: colors.accentLine, backgroundColor: colors.surface2 },
   icon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.accentSoft,
   },
-  name: { color: colors.foreground, fontSize: 15.5, fontWeight: '800', lineHeight: 20 },
-  hint: { color: colors.muted, fontSize: 13, lineHeight: 18, marginTop: 3 },
+  name: { color: colors.foreground, fontSize: 14, fontWeight: '700', lineHeight: 18 },
+  hint: { color: colors.muted, fontSize: 12, lineHeight: 16, marginTop: 2 },
 }));
