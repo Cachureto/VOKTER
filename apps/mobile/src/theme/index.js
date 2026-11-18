@@ -1,9 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Font from 'expo-font';
+import { ARCHIVOS, conFuente, marcarFuentes } from './fonts';
 import { palettes } from './colors';
 
 export { alpha, palettes } from './colors';
+export { FUENTE } from './fonts';
 
 // Clave propia: la preferencia de la app de la tienda no se mezcla con esta.
 const CLAVE = 'f360-theme';
@@ -22,12 +25,17 @@ export function ThemeProvider({ children }) {
   const [listo, setListo] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(CLAVE)
+    // Preferencia guardada y tipografías, en paralelo. Si las fuentes no
+    // cargan, la app sigue con la del sistema en vez de quedarse en blanco.
+    const preferencia = AsyncStorage.getItem(CLAVE)
       .then((v) => {
         if (v === 'light' || v === 'dark' || v === 'system') setPreferenceState(v);
       })
-      .catch(() => {})
-      .finally(() => setListo(true));
+      .catch(() => {});
+    const fuentes = Font.loadAsync(ARCHIVOS)
+      .then(() => marcarFuentes(true))
+      .catch(() => marcarFuentes(false));
+    Promise.all([preferencia, fuentes]).finally(() => setListo(true));
   }, []);
 
   const scheme =
@@ -83,7 +91,11 @@ export function makeStyles(factory) {
   const cache = {};
   return function useStyles() {
     const { scheme, colors } = useTheme();
-    if (!cache[scheme]) cache[scheme] = StyleSheet.create(factory(colors));
+    if (!cache[scheme]) {
+      const crudo = factory(colors);
+      const conFuentes = Object.fromEntries(Object.entries(crudo).map(([k, v]) => [k, conFuente(v)]));
+      cache[scheme] = StyleSheet.create(conFuentes);
+    }
     return cache[scheme];
   };
 }

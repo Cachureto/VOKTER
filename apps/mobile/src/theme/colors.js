@@ -30,10 +30,10 @@ export const palettes = {
   // un pelo (blanco al 7%), como las apps actuales. El dorado se reserva para
   // lo accionable: cuotas, botones principales y estados activos.
   dark: conTonos({
-    background: '#07090d',
-    surface: '#0f131a',
-    surface2: '#161b24',
-    surfaceHover: '#1d232e',
+    background: '#0b0f15',
+    surface: '#141920',
+    surface2: '#1b2129',
+    surfaceHover: '#232a34',
     border: 'rgba(255,255,255,0.07)',
     borderStrong: 'rgba(255,255,255,0.14)',
     foreground: '#f5f7fa',
@@ -41,7 +41,7 @@ export const palettes = {
     subtle: '#5b6371',
     // "Contraste": blanco en oscuro, para chips y estados activos neutros.
     contrast: '#f5f7fa',
-    contrastForeground: '#07090d',
+    contrastForeground: '#0b0f15',
     // Dorado de la marca. Sobre él va texto oscuro.
     accent: '#f0bf3a',
     accentHover: '#f6cc55',
@@ -53,7 +53,7 @@ export const palettes = {
     live: '#22c55e',
     danger: '#f43f5e',
     warning: '#f59e0b',
-    tile: '#161b24',
+    tile: '#1b2129',
   }),
   // Claro: gris neutro frío de fondo y tarjetas blancas.
   light: conTonos({

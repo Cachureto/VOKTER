@@ -9,7 +9,7 @@ import MainMenu from '../src/components/MainMenu';
 import { AuthProvider } from '../src/lib/auth-context';
 import { BetSlipProvider } from '../src/lib/betslip-context';
 import { MenuProvider } from '../src/lib/menu-context';
-import { ThemeProvider, useTheme } from '../src/theme';
+import { FUENTE, ThemeProvider, useTheme } from '../src/theme';
 
 export default function RootLayout() {
   return (
@@ -44,7 +44,7 @@ function ThemedStack() {
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.foreground,
           headerShadowVisible: false,
-          headerTitleStyle: { fontWeight: '700', fontSize: 17 },
+          headerTitleStyle: { fontFamily: FUENTE.bold, fontSize: 17 },
           contentStyle: { backgroundColor: colors.background },
           animation: 'fade_from_bottom',
           // Menú a la izquierda (por ahí entra el panel); modo y boleto a la derecha.
@@ -54,8 +54,8 @@ function ThemedStack() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="partidos" options={{ title: 'Partidos' }} />
-        <Stack.Screen name="partido/[id]" options={{ title: '', animation: 'slide_from_right' }} />
-        <Stack.Screen name="boleto" options={{ title: 'Boleto', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="partido/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
+        <Stack.Screen name="boleto" options={{ headerShown: false, animation: 'slide_from_bottom' }} />
         <Stack.Screen name="apuestas" options={{ title: 'Mis apuestas' }} />
         <Stack.Screen name="billetera" options={{ title: 'Billetera' }} />
         <Stack.Screen name="cuenta" options={{ title: 'Mi cuenta' }} />

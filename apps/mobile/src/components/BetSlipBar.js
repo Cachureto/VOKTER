@@ -62,7 +62,7 @@ export default function BetSlipBar() {
         styles.wrap,
         {
           // Con la barra de navegación visible, el boleto flota justo encima.
-          paddingBottom: insets.bottom + (conNav(pathname) ? ALTO_NAV + 18 : 12),
+          paddingBottom: insets.bottom + (conNav(pathname) ? ALTO_NAV + 22 : 12),
           opacity: t,
           transform: [{ translateY: t.interpolate({ inputRange: [0, 1], outputRange: [120, 0] }) }],
         },
@@ -97,9 +97,9 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    height: 58,
+    height: 60,
     paddingHorizontal: 12,
-    borderRadius: 18,
+    borderRadius: 22,
     backgroundColor: DORADO.fondo,
     shadowColor: '#000',
     shadowOpacity: 0.35,

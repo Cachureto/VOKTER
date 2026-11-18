@@ -5,6 +5,7 @@ import { useBetSlip } from '../lib/betslip-context';
 import { formatOdds } from '../lib/format';
 import { MERCADOS, rotulo } from '../lib/markets';
 import { CURVAS, movimientoReducido, RESORTES } from '../lib/motion';
+import { DORADO } from '../theme/colors';
 import { makeStyles, useTheme } from '../theme';
 import Tap from './Tap';
 
@@ -26,20 +27,13 @@ export function aSeleccion(match, market, sel) {
 }
 
 /**
- * Botón de cuota, como los de la plantilla: rótulo pequeño arriba (1, X, 2…)
- * y la cuota grande en dorado. Al tocarlo se hunde, se rellena de dorado con
- * un pequeño salto y entra al boleto. Si la cuota cambia mientras se ve (en
- * vivo, al refrescar), parpadea en verde si sube o en rojo si baja.
+ * Animaciones compartidas por la ficha y la barra de cuota: transición
+ * normal→elegida, "pop" al elegirla y destello verde/rojo si la cuota cambia.
  */
-function OddButton({ match, market, selection, style, showLabel = false, vertical = false }) {
-  const styles = useStyles();
-  const { colors } = useTheme();
+function useCuota(match, market, selection) {
   const slip = useBetSlip();
   const abierto = market.status === 'open' && match.status === 'scheduled';
   const elegido = slip.has(selection.id);
-  const resultado = selection.result;
-
-  // 0 = normal, 1 = elegido. Colores: no se pueden animar en el hilo nativo.
   const sel = useRef(new Animated.Value(elegido ? 1 : 0)).current;
   const pop = useRef(new Animated.Value(1)).current;
   const flash = useRef(new Animated.Value(0)).current;
@@ -58,7 +52,7 @@ function OddButton({ match, market, selection, style, showLabel = false, vertica
       useNativeDriver: false,
     }).start();
     if (elegido) {
-      pop.setValue(1.1);
+      pop.setValue(1.08);
       Animated.spring(pop, { toValue: 1, ...RESORTES.pop, useNativeDriver: true }).start();
     }
   }, [elegido, sel, pop]);
@@ -74,17 +68,36 @@ function OddButton({ match, market, selection, style, showLabel = false, vertica
     );
   }, [selection.odds, flash]);
 
-  const fondo = sel.interpolate({ inputRange: [0, 1], outputRange: [colors.surface2, colors.accent] });
+  const tocar = () => slip.toggle(aSeleccion(match, market, selection));
+  return { abierto, elegido, sel, pop, flash, subio, tocar };
+}
+
+function Flecha({ subio, colors }) {
+  if (subio === null) return null;
+  return <Ionicons name={subio ? 'caret-up' : 'caret-down'} size={11} color={subio ? colors.live : colors.danger} />;
+}
+
+/**
+ * Ficha de cuota: rótulo pequeño arriba (1, X, 2, Más…) y la cuota grande
+ * debajo. Elegida se rellena de dorado con un pequeño salto.
+ */
+function OddButton({ match, market, selection, style, showLabel = false }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  const { abierto, elegido, sel, pop, flash, subio, tocar } = useCuota(match, market, selection);
+  const resultado = selection.result;
+
+  const fondo = sel.interpolate({ inputRange: [0, 1], outputRange: [colors.surface2, DORADO.fondo] });
   const borde =
     subio === null
       ? resultado === 'won'
         ? colors.live
-        : sel.interpolate({ inputRange: [0, 1], outputRange: ['rgba(0,0,0,0)', colors.accent] })
+        : sel.interpolate({ inputRange: [0, 1], outputRange: ['rgba(0,0,0,0)', DORADO.brillo] })
       : flash.interpolate({ inputRange: [0, 1], outputRange: ['rgba(0,0,0,0)', subio ? colors.live : colors.danger] });
 
   return (
     <Tap
-      onPress={() => slip.toggle(aSeleccion(match, market, selection))}
+      onPress={tocar}
       disabled={!abierto}
       scaleTo={0.92}
       accessibilityRole="button"
@@ -93,21 +106,13 @@ function OddButton({ match, market, selection, style, showLabel = false, vertica
       style={[styles.wrap, style]}
     >
       <Animated.View style={{ flex: 1, transform: [{ scale: pop }] }}>
-        <Animated.View
-          style={[styles.btn, vertical && styles.btnVertical, { backgroundColor: fondo, borderColor: borde }]}
-        >
-          <Text style={[styles.label, !vertical && styles.labelRow, elegido && styles.onTextSoft]} numberOfLines={1}>
+        <Animated.View style={[styles.btn, { backgroundColor: fondo, borderColor: borde }]}>
+          <Text style={[styles.label, elegido && styles.onTextSoft]} numberOfLines={1}>
             {showLabel ? selection.label : rotulo(market.type, selection.code)}
           </Text>
           {abierto || resultado ? (
             <View style={styles.oddsRow}>
-              {subio !== null && (
-                <Ionicons
-                  name={subio ? 'caret-up' : 'caret-down'}
-                  size={12}
-                  color={subio ? colors.live : colors.danger}
-                />
-              )}
+              <Flecha subio={subio} colors={colors} />
               <Text style={[styles.odds, elegido && styles.onText, !abierto && styles.oddsOff]}>
                 {formatOdds(selection.odds)}
               </Text>
@@ -125,34 +130,118 @@ function OddButton({ match, market, selection, style, showLabel = false, vertica
 
 export default memo(OddButton);
 
+/**
+ * Barra de probabilidad: una fila por resultado, con un relleno del ancho de
+ * la probabilidad implícita de la cuota. Elegida, el borde y la cuota se
+ * vuelven dorados.
+ */
+export const OddBar = memo(function OddBar({ match, market, selection, probabilidad = 0 }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  const { abierto, elegido, sel, pop, flash, subio, tocar } = useCuota(match, market, selection);
+  const resultado = selection.result;
+  // El relleno crece desde cero al montarse.
+  const ancho = useRef(new Animated.Value(movimientoReducido() ? probabilidad : 0)).current;
+
+  useEffect(() => {
+    if (movimientoReducido()) {
+      ancho.setValue(probabilidad);
+      return;
+    }
+    Animated.timing(ancho, {
+      toValue: probabilidad,
+      duration: 700,
+      easing: CURVAS.entrar,
+      useNativeDriver: false,
+    }).start();
+  }, [probabilidad, ancho]);
+
+  const borde =
+    subio === null
+      ? resultado === 'won'
+        ? colors.live
+        : sel.interpolate({ inputRange: [0, 1], outputRange: [colors.border, colors.accent] })
+      : flash.interpolate({ inputRange: [0, 1], outputRange: [colors.border, subio ? colors.live : colors.danger] });
+  const fondo = sel.interpolate({ inputRange: [0, 1], outputRange: [colors.surface, colors.accentSoft] });
+  const relleno = elegido ? colors.accentLine : colors.accentSoft;
+
+  return (
+    <Tap
+      onPress={tocar}
+      disabled={!abierto}
+      scaleTo={0.97}
+      accessibilityRole="button"
+      accessibilityState={{ selected: elegido, disabled: !abierto }}
+      accessibilityLabel={`${selection.label}, ${Math.round(probabilidad * 100)} por ciento, cuota ${formatOdds(selection.odds)}`}
+    >
+      <Animated.View style={[styles.bar, { borderColor: borde, backgroundColor: fondo, transform: [{ scale: pop }] }]}>
+        <Animated.View
+          style={[
+            styles.fill,
+            {
+              backgroundColor: relleno,
+              width: ancho.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
+            },
+          ]}
+        />
+        <Text style={styles.barLabel} numberOfLines={1}>
+          {selection.label}
+        </Text>
+        <Text style={styles.barPct}>{Math.round(probabilidad * 100)}%</Text>
+        {abierto || resultado ? (
+          <View style={[styles.oddsRow, styles.barOdds]}>
+            <Flecha subio={subio} colors={colors} />
+            <Text style={[styles.barOddsText, elegido && { color: colors.accent }, !abierto && styles.oddsOff]}>
+              {formatOdds(selection.odds)}
+            </Text>
+          </View>
+        ) : (
+          <Ionicons name="lock-closed" size={14} color={colors.subtle} style={styles.barOdds} />
+        )}
+      </Animated.View>
+    </Tap>
+  );
+});
+
 const useStyles = makeStyles((colors) => ({
   wrap: { flex: 1 },
-  // Fila: rótulo a la izquierda y cuota a la derecha, como en las casas de
-  // apuestas actuales. `vertical` apila los dos para cuadrículas estrechas.
   btn: {
     flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 6,
-    minHeight: 46,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    justifyContent: 'center',
+    gap: 1,
+    minHeight: 54,
+    paddingHorizontal: 6,
+    borderRadius: 15,
     borderWidth: 1,
   },
-  btnVertical: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    gap: 2,
-    minHeight: 56,
-    paddingHorizontal: 6,
-  },
-  label: { color: colors.muted, fontSize: 12.5, fontWeight: '600' },
-  labelRow: { flexShrink: 1 },
+  label: { color: colors.muted, fontSize: 11.5, fontWeight: '600' },
   oddsRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  odds: { color: colors.foreground, fontSize: 15.5, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  odds: { color: colors.foreground, fontSize: 17, fontWeight: '800', fontVariant: ['tabular-nums'] },
   oddsOff: { color: colors.subtle },
-  onText: { color: colors.accentForeground },
-  onTextSoft: { color: colors.accentForeground, opacity: 0.75 },
-  lock: { height: 20, justifyContent: 'center' },
+  onText: { color: DORADO.texto },
+  onTextSoft: { color: DORADO.texto, opacity: 0.7 },
+  lock: { height: 22, justifyContent: 'center' },
+  // ---- barra ----
+  bar: {
+    height: 54,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  fill: { position: 'absolute', left: 0, top: 0, bottom: 0 },
+  barLabel: { flex: 1, color: colors.foreground, fontSize: 14.5, fontWeight: '600' },
+  barPct: { color: colors.muted, fontSize: 12.5, fontWeight: '600', fontVariant: ['tabular-nums'] },
+  barOdds: { minWidth: 48, justifyContent: 'flex-end' },
+  barOddsText: {
+    color: colors.foreground,
+    fontSize: 17.5,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+    textAlign: 'right',
+  },
 }));
